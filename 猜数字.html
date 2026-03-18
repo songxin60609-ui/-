@@ -37,14 +37,97 @@
             color: white;
             border: none;
             border-radius: 5px;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
         button:hover {
             background-color: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0,0,0,0.15);
+        }
+        button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .show-answer-btn {
+            background-color: #e74c3c !important;
+        }
+        .show-answer-btn:hover {
+            background-color: #c0392b !important;
+        }
+        #answer {
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        .answer-enter {
+            animation: fadeInUp 0.3s ease forwards;
+        }
+        .answer-exit {
+            animation: fadeOutDown 0.3s ease forwards;
+        }
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .toggle-sign-btn {
+            width: 30px;
+            height: 30px;
+            padding: 0;
+            font-size: 18px;
+            font-weight: bold;
+            background-color: #3498db;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            transition: none;
+            margin-bottom: 5px;
+        }
+        .toggle-sign-btn:hover {
+            background-color: #2980b9;
+        }
+        .guess-input-wrapper {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+        }
+        .guess-input-wrapper .toggle-sign-btn {
+            margin-bottom: 0;
+            margin-right: 5px;
         }
         #message {
             margin-top: 20px;
             font-size: 18px;
             min-height: 24px;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        .message-enter {
+            animation: fadeInUp 0.3s ease forwards;
+        }
+        .message-exit {
+            animation: fadeOutDown 0.3s ease forwards;
+        }
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        @keyframes fadeOutDown {
+            from {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
         }
     </style>
 </head>
@@ -52,10 +135,45 @@
     <a href="index.html" style="position: absolute; top: 20px; left: 20px; padding: 10px 20px; background-color: #95a5a6; color: white; text-decoration: none; border-radius: 5px; font-family: Arial, sans-serif;">返回</a>
     <div class="game-container">
         <h1>猜数字游戏</h1>
-        <p>我已经想好了一个1到100之间的数字。你能猜出来吗？</p>
-        <input type="number" id="guessInput" min="1" max="100" placeholder="输入你的猜测">
-        <button onclick="checkGuess()">猜一猜</button>
-        <button onclick="newGame()">新游戏</button>
+        <p id="rangeText">我已经想好了一个1到100之间的数字。你能猜出来吗？</p>
+
+        <div id="customRangePanel" style="display: none; margin-bottom: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 8px;">
+            <h3 style="margin-top: 0;">设置范围</h3>
+            <p style="margin-bottom: 15px; color: #666; font-size: 14px;">最大范围：-100亿 到 100亿</p>
+            <div style="display: flex; gap: 10px; align-items: center; justify-content: center;">
+                <div style="display: flex; flex-direction: column; align-items: center;">
+                    <label for="minRange">最小值</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="minRange" placeholder="最小值" step="1" oninput="handleRangeInput(this)">
+                        <button class="toggle-sign-btn" onclick="toggleSign('minRange')">±</button>
+                    </div>
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: center;">
+                    <label for="maxRange">最大值</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="maxRange" placeholder="最大值" step="1" oninput="handleRangeInput(this)">
+                        <button class="toggle-sign-btn" onclick="toggleSign('maxRange')">±</button>
+                    </div>
+                </div>
+                <button onclick="applyCustomRange()" style="margin-top: 18px;">应用</button>
+            </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; align-items: center;">
+            <div class="guess-input-wrapper">
+                <button class="toggle-sign-btn" onclick="toggleSign('guessInput')">±</button>
+                <input type="number" id="guessInput" min="1" max="100" placeholder="输入你的猜测" step="1" oninput="this.value = this.value.replace(/[^0-9-]/g, ''); this.value = this.value.replace(/^-+/g, '-').replace(/--/g, '-');">
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                <button onclick="checkGuess()">猜一猜</button>
+                <button onclick="newGame()">新游戏</button>
+                <button onclick="toggleCustomRange()">自定义范围</button>
+                <div style="display: flex; flex-direction: column; align-items: center;">
+                    <button class="show-answer-btn" onclick="showAnswer()">查看答案</button>
+                    <div id="answer" style="font-size: 18px; font-weight: bold; color: #e74c3c; min-height: 24px; margin-top: 5px;"></div>
+                </div>
+            </div>
+        </div>
         <div id="message"></div>
     </div>
 
@@ -64,26 +182,295 @@
         let attempts = 0;
 
         function newGame() {
-            targetNumber = Math.floor(Math.random() * 100) + 1;
+            targetNumber = Math.floor(Math.random() * (maxRangeValue - minRangeValue + 1)) + minRangeValue;
             attempts = 0;
+            gameWon = false;
             document.getElementById('guessInput').value = '';
             document.getElementById('message').textContent = '';
+
+            // 为答案提示添加离场动画
+            const answerEl = document.getElementById('answer');
+            if (answerEl.textContent) {
+                answerEl.classList.add('answer-exit');
+                answerEl.classList.remove('answer-enter');
+                setTimeout(() => {
+                    answerEl.textContent = '';
+                    answerEl.classList.remove('answer-exit');
+                }, 300);
+            }
+        }
+
+        let gameWon = false;
+        let minRangeValue = 1;
+        let maxRangeValue = 100;
+
+        function handleRangeInput(input) {
+            const minLimit = -10000000000; // -100亿
+            const maxLimit = 10000000000;  // 100亿
+
+            // 获取当前光标位置
+            let cursorPosition = input.selectionStart;
+
+            // 移除所有非数字字符（除了开头的负号）
+            let value = input.value;
+
+            // 如果第一个字符是负号，保留它
+            let hasNegative = value.startsWith('-');
+
+            // 移除所有非数字字符
+            value = value.replace(/[^0-9]/g, '');
+
+            // 如果原本有负号，添加回去
+            if (hasNegative) {
+                value = '-' + value;
+            }
+
+            // 如果值只是负号，保留它
+            if (value === '-') {
+                input.value = value;
+                return;
+            }
+
+            // 转换为数字
+            let numValue = parseInt(value);
+
+            // 如果不是有效数字，清空输入
+            if (isNaN(numValue)) {
+                input.value = '';
+                return;
+            }
+
+            // 检查是否超出范围，如果超出则立即纠正
+            if (numValue < minLimit) {
+                numValue = minLimit;
+                value = minLimit.toString();
+            } else if (numValue > maxLimit) {
+                numValue = maxLimit;
+                value = maxLimit.toString();
+            }
+
+            // 更新输入框的值
+            input.value = value;
+
+            // 恢复光标位置
+            input.setSelectionRange(cursorPosition, cursorPosition);
+        }
+
+        function toggleCustomRange() {
+            const panel = document.getElementById('customRangePanel');
+            const guessInput = document.getElementById('guessInput');
+            const checkButton = document.querySelector('button[onclick="checkGuess()"]');
+            const showAnswerButton = document.querySelector('button[onclick="showAnswer()"]');
+            const newGameButton = document.querySelector('button[onclick="newGame()"]');
+
+            if (panel.style.display === 'none') {
+                panel.style.display = 'block';
+                document.getElementById('minRange').value = minRangeValue;
+                document.getElementById('maxRange').value = maxRangeValue;
+
+                // 清空提示信息
+                const messageEl = document.getElementById('message');
+                messageEl.textContent = '';
+                messageEl.classList.remove('message-enter');
+                messageEl.classList.remove('message-exit');
+
+                // 禁用猜数和查看答案功能
+                guessInput.disabled = true;
+                checkButton.disabled = true;
+                showAnswerButton.disabled = true;
+                newGameButton.disabled = true;
+
+                // 添加禁用样式
+                checkButton.style.opacity = '0.5';
+                checkButton.style.cursor = 'not-allowed';
+                showAnswerButton.style.opacity = '0.5';
+                showAnswerButton.style.cursor = 'not-allowed';
+                newGameButton.style.opacity = '0.5';
+                newGameButton.style.cursor = 'not-allowed';
+                guessInput.style.opacity = '0.5';
+                guessInput.style.cursor = 'not-allowed';
+
+                // 隐藏猜测输入框的切换按钮
+                const guessToggleBtn = document.querySelector('button[onclick="toggleSign(\'guessInput\')"]');
+                if (guessToggleBtn) {
+                    guessToggleBtn.style.display = 'none';
+                }
+            } else {
+                panel.style.display = 'none';
+
+                // 启用猜数和查看答案功能
+                guessInput.disabled = false;
+                checkButton.disabled = false;
+                showAnswerButton.disabled = false;
+                newGameButton.disabled = false;
+
+                // 移除禁用样式
+                checkButton.style.opacity = '1';
+                checkButton.style.cursor = 'pointer';
+                showAnswerButton.style.opacity = '1';
+                showAnswerButton.style.cursor = 'pointer';
+                newGameButton.style.opacity = '1';
+                newGameButton.style.cursor = 'pointer';
+                guessInput.style.opacity = '1';
+                guessInput.style.cursor = 'text';
+
+                // 显示猜测输入框的切换按钮
+                const guessToggleBtn = document.querySelector('button[onclick="toggleSign(\'guessInput\')"]');
+                if (guessToggleBtn) {
+                    guessToggleBtn.style.display = 'flex';
+                }
+            }
+        }
+
+        function applyCustomRange() {
+            const minInput = parseInt(document.getElementById('minRange').value);
+            const maxInput = parseInt(document.getElementById('maxRange').value);
+            const minLimit = -10000000000; // -100亿
+            const maxLimit = 10000000000;  // 100亿
+
+            if (isNaN(minInput) || isNaN(maxInput)) {
+                showMessage('请输入有效的数字！');
+                return;
+            }
+
+            // 限制最小值范围
+            let adjustedMin = minInput;
+            if (minInput < minLimit) {
+                adjustedMin = minLimit;
+                document.getElementById('minRange').value = minLimit;
+            } else if (minInput > maxLimit) {
+                adjustedMin = maxLimit;
+                document.getElementById('minRange').value = maxLimit;
+            }
+
+            // 限制最大值范围
+            let adjustedMax = maxInput;
+            if (maxInput < minLimit) {
+                adjustedMax = minLimit;
+                document.getElementById('maxRange').value = minLimit;
+            } else if (maxInput > maxLimit) {
+                adjustedMax = maxLimit;
+                document.getElementById('maxRange').value = maxLimit;
+            }
+
+            if (adjustedMin === adjustedMax) {
+                showMessage('最小值和最大值不能相同！');
+                return;
+            }
+
+            if (adjustedMin > adjustedMax) {
+                showMessage('最小值不能大于最大值！');
+                return;
+            }
+
+            minRangeValue = adjustedMin;
+            maxRangeValue = adjustedMax;
+
+            // 更新提示文本
+            document.getElementById('rangeText').textContent = `我已经想好了一个${minRangeValue}到${maxRangeValue}之间的数字。你能猜出来吗？`;
+
+            // 更新输入框的min和max属性
+            const guessInput = document.getElementById('guessInput');
+            guessInput.min = minRangeValue;
+            guessInput.max = maxRangeValue;
+
+            // 重新启用猜数和查看答案功能
+            guessInput.disabled = false;
+            guessInput.style.opacity = '1';
+            guessInput.style.cursor = 'text';
+
+            const checkButton = document.querySelector('button[onclick="checkGuess()"]');
+            checkButton.disabled = false;
+            checkButton.style.opacity = '1';
+            checkButton.style.cursor = 'pointer';
+
+            const showAnswerButton = document.querySelector('button[onclick="showAnswer()"]');
+            showAnswerButton.disabled = false;
+            showAnswerButton.style.opacity = '1';
+            showAnswerButton.style.cursor = 'pointer';
+
+            const newGameButton = document.querySelector('button[onclick="newGame()"]');
+            newGameButton.disabled = false;
+            newGameButton.style.opacity = '1';
+            newGameButton.style.cursor = 'pointer';
+
+            // 开始新游戏
+            newGame();
+
+            // 隐藏自定义范围面板
+            document.getElementById('customRangePanel').style.display = 'none';
+
+            showMessage(`范围已设置为 ${minRangeValue} 到 ${maxRangeValue}，新游戏已开始！`);
         }
 
         function checkGuess() {
             const guess = parseInt(document.getElementById('guessInput').value);
-            if (isNaN(guess) || guess < 1 || guess > 100) {
-                document.getElementById('message').textContent = '请输入1到100之间的数字！';
+            const messageEl = document.getElementById('message');
+
+            // 如果游戏已经结束，不允许继续猜测
+            if (gameWon) {
+                showMessage('游戏已经结束！请点击"新游戏"开始新的一局。');
+                return;
+            }
+
+            if (isNaN(guess) || guess < minRangeValue || guess > maxRangeValue) {
+                showMessage(`请输入${minRangeValue}到${maxRangeValue}之间的数字！`);
                 return;
             }
             attempts++;
             if (guess === targetNumber) {
-                document.getElementById('message').textContent = `恭喜！你猜对了！答案是 ${targetNumber}。你用了 ${attempts} 次尝试。`;
+                gameWon = true;
+                showMessage(`恭喜！你猜对了！答案是 ${targetNumber}。你用了 ${attempts} 次尝试。`);
             } else if (guess < targetNumber) {
-                document.getElementById('message').textContent = '太小了！再试试。';
+                showMessage('太小了！再试试。');
             } else {
-                document.getElementById('message').textContent = '太大了！再试试。';
+                showMessage('太大了！再试试。');
             }
+        }
+
+        function showMessage(text) {
+            const messageEl = document.getElementById('message');
+
+            // 如果有旧消息，先执行离场动画
+            if (messageEl.textContent) {
+                messageEl.classList.add('message-exit');
+                messageEl.classList.remove('message-enter');
+
+                setTimeout(() => {
+                    messageEl.textContent = text;
+                    messageEl.classList.remove('message-exit');
+                    messageEl.classList.add('message-enter');
+                }, 300);
+            } else {
+                // 如果没有旧消息，直接显示新消息
+                messageEl.textContent = text;
+                messageEl.classList.add('message-enter');
+            }
+        }
+
+        function showAnswer() {
+            const answerEl = document.getElementById('answer');
+            answerEl.textContent = `答案是 ${targetNumber}！`;
+            answerEl.classList.add('answer-enter');
+        }
+
+        function toggleSign(inputId) {
+            const input = document.getElementById(inputId);
+            let value = input.value;
+
+            if (value === '' || value === '-') {
+                // 如果输入框为空或只有负号，不做任何操作
+                return;
+            }
+
+            // 切换正负号
+            if (value.startsWith('-')) {
+                value = value.substring(1);
+            } else {
+                value = '-' + value;
+            }
+
+            input.value = value;
         }
 
         // 初始化游戏
