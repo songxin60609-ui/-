@@ -675,12 +675,17 @@
 
             // 重建路径
             pathCells = [];
-            let current = end;
-            while (current) {
-                pathCells.push(current);
-                current = parent[current.y][current.x];
+            if (found) {
+                let current = end;
+                while (current) {
+                    pathCells.push(current);
+                    current = parent[current.y][current.x];
+                }
+                pathCells.reverse();
+            } else {
+                // 如果没有找到路径，至少包含起点和终点
+                pathCells = [start, end];
             }
-            pathCells.reverse();
         }
 
         function drawPath() {
@@ -771,7 +776,14 @@
         }
 
         function initGame() {
-            size = parseInt(document.getElementById('difficulty').value);
+            const difficultySelect = document.getElementById('difficulty');
+            size = parseInt(difficultySelect.value);
+
+            // 确保size是有效的奇数
+            if (isNaN(size) || size < 11 || size > 61 || size % 2 === 0) {
+                size = 21; // 默认值
+                difficultySelect.value = 21;
+            }
             
             // 随机选择墙壁和路径颜色
             const wallColor = wallColors[Math.floor(Math.random() * wallColors.length)];
@@ -820,6 +832,11 @@
             generateKruskalMaze();
             drawMaze();
             
+            // 初始化玩家位置（必须在calculatePath之前）
+            playerPos = { x: 1, y: 1 };
+            if (!playerObj) playerObj = document.getElementById('player');
+            updatePlayerPosition();
+
             // 计算最短路径
             calculatePath();
             minSteps = pathCells.length - 1;
@@ -831,10 +848,7 @@
             document.getElementById('b-threshold').innerText = Math.ceil(minSteps * 3);
             document.getElementById('c-threshold').innerText = Math.ceil(minSteps * 3);
             
-            // 初始化玩家
-            playerPos = { x: 1, y: 1 };
-            if (!playerObj) playerObj = document.getElementById('player');
-            updatePlayerPosition();
+            // 初始化玩家位置（已在calculatePath之前完成）
             container.style.visibility = "visible";
         }
 
