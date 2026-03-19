@@ -309,6 +309,203 @@
         .input-btn:active {
             transform: scale(0.95);
         }
+
+        /* 移动端适配 */
+        @media screen and (max-width: 768px) {
+            body {
+                padding: 10px;
+                padding-top: 60px;
+                box-sizing: border-box;
+            }
+
+            .panel {
+                width: 100%;
+                max-width: 100%;
+                padding: 10px;
+            }
+
+            .header {
+                padding: 8px;
+                font-size: 20px;
+            }
+
+            #grid {
+                grid-template-columns: repeat(10, 30px);
+                grid-gap: 1px;
+            }
+
+            .cell {
+                width: 30px;
+                height: 30px;
+                font-size: 18px;
+            }
+
+            .mine-setting {
+                padding: 8px;
+                gap: 10px;
+            }
+
+            .mine-setting span {
+                font-size: 14px;
+            }
+
+            .setting-btn {
+                padding: 6px 15px;
+                font-size: 13px;
+            }
+
+            .game-layout {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .cheat-container {
+                margin-left: 0;
+                margin-top: 15px;
+                align-items: center;
+            }
+
+            .cheat-panel {
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                right: auto;
+                margin-top: 0;
+                background: rgba(44, 62, 80, 0.98);
+                padding: 15px;
+                border-radius: 10px;
+                max-width: 90%;
+                max-height: 70vh;
+                overflow-y: auto;
+            }
+
+            .cheat-btn {
+                padding: 10px 15px;
+                font-size: 13px;
+            }
+
+            .time-display {
+                top: 10px;
+                right: 10px;
+                font-size: 14px;
+                padding: 8px 12px;
+            }
+
+            .back-btn {
+                top: 10px;
+                left: 10px;
+                padding: 8px 16px;
+                font-size: 14px;
+            }
+
+            .input-box {
+                min-width: 280px;
+                padding: 20px;
+            }
+
+            .input-box h3 {
+                font-size: 18px;
+            }
+
+            #result-text {
+                font-size: 24px;
+            }
+
+            .play-again-btn {
+                padding: 10px 20px;
+                font-size: 16px;
+            }
+        }
+
+        /* 小屏幕手机适配 */
+        @media screen and (max-width: 480px) {
+            body {
+                padding: 5px;
+                padding-top: 50px;
+            }
+
+            .panel {
+                padding: 8px;
+            }
+
+            .header {
+                padding: 6px;
+                font-size: 18px;
+            }
+
+            #grid {
+                grid-template-columns: repeat(10, 25px);
+                grid-gap: 1px;
+            }
+
+            .cell {
+                width: 25px;
+                height: 25px;
+                font-size: 16px;
+            }
+
+            .mine-setting {
+                padding: 6px;
+                gap: 8px;
+            }
+
+            .mine-setting span {
+                font-size: 12px;
+            }
+
+            #mineCountDisplay {
+                font-size: 16px;
+            }
+
+            .setting-btn {
+                padding: 5px 12px;
+                font-size: 12px;
+            }
+
+            .cheat-btn {
+                padding: 8px 12px;
+                font-size: 12px;
+            }
+
+            .time-display {
+                font-size: 12px;
+                padding: 6px 10px;
+            }
+
+            .back-btn {
+                padding: 6px 12px;
+                font-size: 12px;
+            }
+
+            .input-box {
+                min-width: 250px;
+                padding: 15px;
+            }
+
+            .input-box h3 {
+                font-size: 16px;
+            }
+
+            .input-group input {
+                font-size: 14px;
+                padding: 8px;
+            }
+
+            .input-btn {
+                padding: 8px 20px;
+                font-size: 13px;
+            }
+
+            #result-text {
+                font-size: 20px;
+            }
+
+            .play-again-btn {
+                padding: 8px 18px;
+                font-size: 14px;
+            }
+        }
     </style>
 </head>
 <body>
