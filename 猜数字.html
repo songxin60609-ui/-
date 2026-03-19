@@ -141,6 +141,140 @@
             border-radius: 8px;
             font-weight: bold;
         }
+
+        /* 移动端适配 */
+        @media screen and (max-width: 768px) {
+            body {
+                padding: 10px;
+                box-sizing: border-box;
+            }
+
+            .game-container {
+                width: 100%;
+                max-width: 100%;
+                padding: 15px;
+                border-radius: 8px;
+            }
+
+            input {
+                width: 100%;
+                max-width: 250px;
+                font-size: 16px;
+                padding: 12px;
+            }
+
+            button {
+                padding: 12px 16px;
+                font-size: 14px;
+                margin: 5px;
+                width: auto;
+                min-width: 80px;
+            }
+
+            h1 {
+                font-size: 24px;
+                margin: 10px 0;
+            }
+
+            #rangeText {
+                font-size: 14px;
+                margin: 10px 0;
+            }
+
+            .time-display {
+                top: 10px;
+                right: 10px;
+                font-size: 14px;
+                padding: 8px 12px;
+            }
+
+            a[href="index.html"] {
+                top: 10px;
+                left: 10px;
+                padding: 8px 16px;
+                font-size: 14px;
+            }
+
+            #customRangePanel {
+                padding: 10px;
+            }
+
+            #customRangePanel h3 {
+                font-size: 16px;
+            }
+
+            #customRangePanel p {
+                font-size: 12px;
+            }
+
+            #message {
+                font-size: 16px;
+                margin-top: 15px;
+            }
+
+            .guess-input-wrapper {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .toggle-sign-btn {
+                width: 36px;
+                height: 36px;
+                font-size: 20px;
+            }
+        }
+
+        /* 小屏幕手机适配 */
+        @media screen and (max-width: 480px) {
+            .game-container {
+                padding: 10px;
+            }
+
+            input {
+                padding: 10px;
+                font-size: 16px;
+            }
+
+            button {
+                padding: 10px 14px;
+                font-size: 13px;
+                margin: 4px;
+            }
+
+            h1 {
+                font-size: 20px;
+            }
+
+            #rangeText {
+                font-size: 13px;
+            }
+
+            .time-display {
+                font-size: 12px;
+                padding: 6px 10px;
+            }
+
+            a[href="index.html"] {
+                padding: 6px 12px;
+                font-size: 13px;
+            }
+
+            #customRangePanel {
+                padding: 8px;
+            }
+
+            #customRangePanel h3 {
+                font-size: 15px;
+            }
+
+            #customRangePanel p {
+                font-size: 11px;
+            }
+
+            #message {
+                font-size: 14px;
+            }
+        }
     </style>
 </head>
 <body>
