@@ -42,7 +42,40 @@
         .dpad-btn { width: 65px; height: 65px; font-size: 24px; border-radius: 50%; background: rgba(255, 255, 255, 0.1); color: white; border: 2px solid #ecf0f1; display: flex; justify-content: center; align-items: center; }
         .dpad-btn:active { background: #f1c40f; border-color: #f1c40f; color: #000; }
 
-        @media (max-width: 768px) { #main-layout { flex-direction: column-reverse; gap: 20px; } .dpad-btn { width: 75px; height: 75px; } }
+        @media (max-width: 768px) { 
+            #main-layout { flex-direction: column-reverse; gap: 20px; } 
+            .dpad-btn { width: 75px; height: 75px; }
+            body { padding: 10px 5px; padding-bottom: 20px; }
+            h1 { font-size: 1.5em; margin-top: 50px; }
+            .controls { max-width: 100%; padding: 0 10px; }
+            .cheat-container { max-width: 100%; padding: 0 10px; }
+            .cheat-panel { padding: 10px; }
+            button.ui-btn { min-width: 70px; font-size: 12px; padding: 8px 10px; }
+            select { padding: 8px 10px; font-size: 12px; }
+            #game-container { max-width: 100%; }
+            .time-display { top: 10px; right: 10px; font-size: 14px; padding: 8px 12px; }
+            a[href="index.html"] { top: 10px; left: 10px; padding: 8px 16px; font-size: 14px; }
+            .mobile-controls { gap: 8px; }
+            .dpad-row { gap: 8px; }
+        }
+
+        @media (max-width: 480px) { 
+            #main-layout { gap: 15px; }
+            .dpad-btn { width: 65px; height: 65px; font-size: 20px; }
+            body { padding: 5px; padding-bottom: 15px; }
+            h1 { font-size: 1.2em; margin-top: 45px; }
+            .controls { margin-bottom: 10px; flex-wrap: wrap; }
+            .cheat-container { margin-bottom: 10px; }
+            button.ui-btn { min-width: 60px; font-size: 11px; padding: 7px 8px; }
+            select { padding: 7px 8px; font-size: 11px; }
+            .cheat-panel { gap: 6px; padding: 8px; }
+            .time-display { font-size: 12px; padding: 6px 10px; }
+            a[href="index.html"] { padding: 6px 12px; font-size: 12px; }
+            .mobile-controls { gap: 6px; }
+            .dpad-row { gap: 6px; }
+            #msg { font-size: 20px; }
+            #startBtn { padding: 10px 25px; font-size: 18px; }
+        }
 
         .time-display {
             position: fixed;
@@ -313,10 +346,28 @@
             if (isGameOver) return;
             isPaused = !isPaused;
             sfx.click();
-            overlay.style.display = isPaused ? "flex" : "none";
-            msg.innerText = isPaused ? "游戏暂停中" : "";
-            settleBtn.style.display = isPaused ? "block" : "none";
-            startBtn.innerText = isPaused ? "继续游戏" : "开始游戏";
+            if (isPaused) {
+                overlay.style.display = "flex";
+                msg.innerText = "游戏暂停中";
+                settleBtn.style.display = "block";
+                startBtn.innerText = "继续游戏";
+                startBtn.onclick = resumeGame;
+            } else {
+                overlay.style.display = "none";
+                msg.innerText = "";
+                settleBtn.style.display = "none";
+                startBtn.innerText = "开始游戏";
+                startBtn.onclick = startGame;
+            }
+        }
+
+        function resumeGame() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            sfx.click();
+            isPaused = false;
+            overlay.style.display = "none";
+            startBtn.onclick = startGame;
+            startBGM();
         }
 
         function immediateSettle() { endGame("手动结算成绩"); }
