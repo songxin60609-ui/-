@@ -13,7 +13,8 @@
             justify-content: center;
             height: 100vh;
             margin: 0;
-            background-color: #f0f0f0;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            min-height: 100vh;
         }
         .game-container {
             text-align: center;
@@ -65,7 +66,6 @@
             animation: fadeOutDown 0.3s ease forwards;
         }
         .input-wrapper {
-            position: relative;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -129,9 +129,22 @@
                 transform: translateY(-10px);
             }
         }
+
+        .time-display {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            font-size: 18px;
+            color: white;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
+    <div class="time-display" id="timeDisplay"></div>
     <a href="index.html" style="position: absolute; top: 20px; left: 20px; padding: 10px 20px; background-color: #95a5a6; color: white; text-decoration: none; border-radius: 5px; font-family: Arial, sans-serif;">返回</a>
     <div class="game-container">
         <h1>猜数字游戏</h1>
@@ -394,6 +407,12 @@
             newGameButton.style.opacity = '1';
             newGameButton.style.cursor = 'pointer';
 
+            // 显示猜测输入框的切换按钮
+            const guessToggleBtn = document.querySelector('button[onclick="toggleSign(\'guessInput\')"]');
+            if (guessToggleBtn) {
+                guessToggleBtn.style.display = 'flex';
+            }
+
             // 开始新游戏
             newGame();
 
@@ -475,6 +494,22 @@
 
         // 初始化游戏
         newGame();
+
+        function updateTime() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+
+            const timeString = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+            document.getElementById('timeDisplay').textContent = timeString;
+        }
+
+        updateTime();
+        setInterval(updateTime, 1000);
     </script>
 </body>
 </html>
