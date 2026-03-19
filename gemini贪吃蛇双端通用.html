@@ -43,9 +43,23 @@
         .dpad-btn:active { background: #f1c40f; border-color: #f1c40f; color: #000; }
 
         @media (max-width: 768px) { #main-layout { flex-direction: column-reverse; gap: 20px; } .dpad-btn { width: 75px; height: 75px; } }
+
+        .time-display {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            font-size: 18px;
+            color: white;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-weight: bold;
+            z-index: 100;
+        }
     </style>
 </head>
 <body>
+    <div class="time-display" id="timeDisplay"></div>
     <a href="index.html" style="position: absolute; top: 20px; left: 20px; padding: 10px 20px; background-color: #95a5a6; color: white; text-decoration: none; border-radius: 5px; font-family: 'Microsoft YaHei', sans-serif; z-index: 100;">返回</a>
     <h1>🐍 贪吃蛇: 视听全能增强版</h1>
 
@@ -363,6 +377,22 @@
                 else changeDirection(...keys[e.keyCode]);
             }
         });
+
+        function updateTime() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+
+            const timeString = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+            document.getElementById('timeDisplay').textContent = timeString;
+        }
+
+        updateTime();
+        setInterval(updateTime, 1000);
     </script>
 </body>
 </html>
