@@ -585,6 +585,7 @@
             outline: none;
             transition: all 0.3s ease;
             width: 150px;
+            font-weight: bold;
         }
 
         .text-input:focus {
@@ -690,6 +691,177 @@
 
         .increase-btn:hover {
             background-color: #27ae60;
+        }
+
+        /* 移动端适配 */
+        @media screen and (max-width: 768px) {
+            body {
+                padding-bottom: 70px;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: fixed;
+                bottom: 0;
+                top: auto;
+                left: 0;
+                background: rgba(0, 0, 0, 0.9);
+                z-index: 1000;
+                padding: 10px;
+            }
+
+            .sidebar-content {
+                display: flex;
+                flex-direction: row;
+                justify-content: space-around;
+                align-items: center;
+                padding: 5px;
+            }
+
+            .counter-info {
+                margin-bottom: 0;
+                padding: 8px 15px;
+                font-size: 14px;
+            }
+
+            .counter-info #counterCountDisplay {
+                font-size: 20px;
+                margin-top: 5px;
+            }
+
+            .add-counter-btn,
+            .delete-counter-btn,
+            .delete-all-btn {
+                padding: 10px 15px;
+                font-size: 14px;
+                margin-top: 0;
+                margin: 0 5px;
+            }
+
+            .counter-container {
+                margin-left: 0;
+                padding: 80px 10px 80px 10px;
+                justify-content: center;
+                align-items: center;
+            }
+
+            .counter-panel {
+                min-width: 200px;
+                padding: 20px;
+                min-height: 250px;
+            }
+
+            .counter-number {
+                font-size: 80px;
+                margin: 0 0 30px 0;
+            }
+
+            .button-group {
+                gap: 10px;
+            }
+
+            .counter-btn {
+                padding: 12px 20px;
+                font-size: 16px;
+            }
+
+            .time-display {
+                top: 10px;
+                right: 10px;
+                font-size: 14px;
+                padding: 8px 12px;
+            }
+
+            a[href="index.html"] {
+                top: 10px;
+                left: 10px;
+                padding: 8px 16px;
+                font-size: 14px;
+            }
+
+            .text-input {
+                width: 120px;
+                font-size: 13px;
+            }
+
+            .modal-content {
+                padding: 20px 25px;
+                max-width: 80%;
+            }
+
+            .modal-content p {
+                font-size: 16px;
+            }
+        }
+
+        /* 小屏幕手机适配 */
+        @media screen and (max-width: 480px) {
+            .counter-panel {
+                min-width: 160px;
+                padding: 15px;
+                min-height: 220px;
+            }
+
+            .counter-number {
+                font-size: 60px;
+                margin: 0 0 20px 0;
+            }
+
+            .counter-btn {
+                padding: 10px 15px;
+                font-size: 14px;
+            }
+
+            .button-group {
+                gap: 8px;
+            }
+
+            .counter-info {
+                padding: 5px 10px;
+                font-size: 12px;
+            }
+
+            .counter-info #counterCountDisplay {
+                font-size: 16px;
+            }
+
+            .add-counter-btn,
+            .delete-counter-btn,
+            .delete-all-btn {
+                padding: 8px 12px;
+                font-size: 12px;
+            }
+
+            .time-display {
+                font-size: 12px;
+                padding: 6px 10px;
+            }
+
+            a[href="index.html"] {
+                padding: 6px 12px;
+                font-size: 12px;
+            }
+
+            .text-input {
+                width: 100px;
+                font-size: 12px;
+            }
+
+            .modal-content {
+                padding: 15px 20px;
+            }
+
+            .modal-content p {
+                font-size: 14px;
+            }
+
+            .modal-close-btn,
+            .modal-cancel-btn,
+            .modal-confirm-btn {
+                padding: 8px 20px;
+                font-size: 14px;
+            }
         }
     </style>
 </head>
