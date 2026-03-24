@@ -3,679 +3,441 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>游戏中心 - 精彩游戏，无限乐趣</title>
+    <title>贪吃蛇: 增强版</title>
     <script>
 var _hmt = _hmt || [];
 (function() {
   var hm = document.createElement("script");
   hm.src = "https://hm.baidu.com/hm.js?43572d67ab5bd2cb80169add393b5373";
-  var s = document.getElementsByTagName("script")[0];
+  var s = document.getElementsByTagName("script")[0]; 
   s.parentNode.insertBefore(hm, s);
 })();
 </script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root {
-            --primary: #667eea;
-            --secondary: #764ba2;
-            --accent: #f093fb;
-            --dark: #1a1a2e;
-            --light: #ffffff;
-            --text-primary: #2d3748;
-            --text-secondary: #718096;
-            --gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --gradient-2: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            --gradient-3: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
-            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
-            --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.15);
-            --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.2);
+        body { background-color: #2c3e50; color: white; text-align: center; font-family: 'Microsoft YaHei', sans-serif; margin: 0; padding: 20px 10px; }
+        .controls, .cheat-container { display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 600px; margin: 0 auto 15px; box-sizing: border-box; }
+        
+        /* 作弊面板样式 */
+        .cheat-panel { 
+            margin-top: 6px; padding: 12px; background: rgba(0, 0, 0, 0.85); 
+            border: 1px solid #3498db; border-radius: 8px; 
+            display: none; flex-wrap: wrap; gap: 8px; justify-content: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        select, button.ui-btn, .dpad-btn { 
+            padding: 10px 12px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer;
+            touch-action: none; transition: all 0.1s; user-select: none; -webkit-tap-highlight-color: transparent;
+        }
+        select { background: #ecf0f1; color: #2c3e50; }
+        button.ui-btn { background: #3498db; color: white; min-width: 90px; font-size: 13px; }
+        button.ui-btn:active { background: #2980b9; transform: scale(0.92); }
+        
+        .btn-orange { background: #e67e22 !important; }
+        .btn-green { background: #2ecc71 !important; }
+        .btn-red { background: #e74c3c !important; }
+        
+        .settle-btn { margin-top: 15px; display: none; width: 150px; font-size: 16px; }
+
+        #main-layout { display: flex; flex-direction: row; justify-content: center; align-items: center; gap: 30px; max-width: 900px; margin: 0 auto; }
+        #game-container { position: relative; width: 100%; max-width: 600px; aspect-ratio: 1 / 1; }
+        canvas { background-color: #34495e; border: 5px solid #ecf0f1; border-radius: 8px; display: block; box-shadow: 0 0 20px rgba(0,0,0,0.5); width: 100%; height: 100%; box-sizing: border-box; }
+        
+        #overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: flex; flex-direction: column; justify-content: center; align-items: center; border-radius: 8px; z-index: 10; }
+        #startBtn { padding: 12px 35px; font-size: 20px; background: #2ecc71; color: white; border-radius: 5px; font-weight: bold; }
+
+        .mobile-controls { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+        .dpad-row { display: flex; gap: 10px; }
+        .dpad-btn { width: 65px; height: 65px; font-size: 24px; border-radius: 50%; background: rgba(255, 255, 255, 0.1); color: white; border: 2px solid #ecf0f1; display: flex; justify-content: center; align-items: center; }
+        .dpad-btn:active { background: #f1c40f; border-color: #f1c40f; color: #000; }
+
+        @media (max-width: 768px) { 
+            #main-layout { flex-direction: column-reverse; gap: 20px; } 
+            .dpad-btn { width: 75px; height: 75px; }
+            body { padding: 10px 5px; padding-bottom: 20px; }
+            h1 { font-size: 1.5em; margin-top: 50px; }
+            .controls { max-width: 100%; padding: 0 10px; }
+            .cheat-container { max-width: 100%; padding: 0 10px; }
+            .cheat-panel { padding: 10px; }
+            button.ui-btn { min-width: 70px; font-size: 12px; padding: 8px 10px; }
+            select { padding: 8px 10px; font-size: 12px; }
+            #game-container { max-width: 100%; }
+            .time-display { top: 10px; right: 10px; font-size: 14px; padding: 8px 12px; }
+            a[href="index.html"] { top: 10px; left: 10px; padding: 8px 16px; font-size: 14px; }
+            .mobile-controls { gap: 8px; }
+            .dpad-row { gap: 8px; }
         }
 
-        html {
-            scroll-behavior: smooth;
+        @media (max-width: 480px) { 
+            #main-layout { gap: 15px; }
+            .dpad-btn { width: 65px; height: 65px; font-size: 20px; }
+            body { padding: 5px; padding-bottom: 15px; }
+            h1 { font-size: 1.2em; margin-top: 45px; }
+            .controls { margin-bottom: 10px; flex-wrap: wrap; }
+            .cheat-container { margin-bottom: 10px; }
+            button.ui-btn { min-width: 60px; font-size: 11px; padding: 7px 8px; }
+            select { padding: 7px 8px; font-size: 11px; }
+            .cheat-panel { gap: 6px; padding: 8px; }
+            .time-display { font-size: 12px; padding: 6px 10px; }
+            a[href="index.html"] { padding: 6px 12px; font-size: 12px; }
+            .mobile-controls { gap: 6px; }
+            .dpad-row { gap: 6px; }
+            #msg { font-size: 20px; }
+            #startBtn { padding: 10px 25px; font-size: 18px; }
         }
 
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            line-height: 1.6;
-            color: var(--text-primary);
-            background: var(--light);
-            overflow-x: hidden;
-        }
-
-        /* 导航栏 */
-        .navbar {
-            position: fixed;
-            top: 0;
-            width: 100%;
-            padding: 1rem 5%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            z-index: 1000;
-            box-shadow: var(--shadow-sm);
-            transition: all 0.3s ease;
-        }
-
-        .navbar.scrolled {
-            box-shadow: var(--shadow-md);
-        }
-
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 700;
-            background: var(--gradient-1);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-decoration: none;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 2rem;
-            list-style: none;
-        }
-
-        .nav-links a {
-            color: var(--text-primary);
-            text-decoration: none;
-            font-weight: 500;
-            transition: color 0.3s ease;
-            position: relative;
-        }
-
-        .nav-links a::after {
-            content: '';
-            position: absolute;
-            bottom: -5px;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background: var(--gradient-1);
-            transition: width 0.3s ease;
-        }
-
-        .nav-links a:hover::after {
-            width: 100%;
-        }
-
-        /* 汉堡包按钮 */
-        .hamburger {
-            display: none;
-            flex-direction: column;
-            justify-content: space-around;
-            width: 30px;
-            height: 25px;
-            cursor: pointer;
-            z-index: 1001;
-            position: relative;
-        }
-
-        .hamburger span {
-            width: 100%;
-            height: 3px;
-            background: var(--text-primary);
-            border-radius: 3px;
-            transition: all 0.3s ease;
-        }
-
-        .hamburger.active span:nth-child(1) {
-            transform: rotate(45deg) translate(5px, 6px);
-        }
-
-        .hamburger.active span:nth-child(2) {
-            opacity: 0;
-        }
-
-        .hamburger.active span:nth-child(3) {
-            transform: rotate(-45deg) translate(5px, -6px);
-        }
-
-        /* 首屏 */
-        .hero {
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            background: var(--gradient-1);
-            color: var(--light);
-            position: relative;
-            overflow: hidden;
-            padding: 100px 20px 60px;
-        }
-
-        .hero::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(
-                45deg,
-                rgba(255, 0, 0, 0.5),
-                rgba(255, 127, 0, 0.5),
-                rgba(255, 255, 0, 0.5),
-                rgba(0, 255, 0, 0.5),
-                rgba(0, 0, 255, 0.5),
-                rgba(75, 0, 130, 0.5),
-                rgba(148, 0, 211, 0.5),
-                rgba(255, 0, 0, 0.5)
-            );
-            background-size: 400% 400%;
-            animation: gradientShift 30s ease infinite;
-            z-index: 0;
-        }
-
-        .hero::after {
-            content: '';
-            position: absolute;
-            bottom: -80px;
-            left: 0;
-            width: 100%;
-            height: 300px;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff" fill-opacity="0.2" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,154.7C960,171,1056,181,1152,165.3C1248,149,1344,107,1392,85.3L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>');
-            background-size: cover;
-            background-repeat: no-repeat;
-            background-position: bottom;
-            animation: wave 5s ease-in-out infinite;
-            z-index: 0;
-        }
-
-        @keyframes gradientShift {
-            0% {
-                background-position: 0% 50%;
-            }
-            50% {
-                background-position: 100% 50%;
-            }
-            100% {
-                background-position: 0% 50%;
-            }
-        }
-
-        @keyframes wave {
-            0%, 100% {
-                transform: translateY(0);
-            }
-            50% {
-                transform: translateY(-15px);
-            }
-        }
-
-        .hero-content {
-            z-index: 1;
-            animation: fadeInUp 1s ease-out;
-        }
-
-        .hero h1 {
-            font-size: clamp(2.5rem, 6vw, 4rem);
-            font-weight: 800;
-            margin-bottom: 1.5rem;
-            letter-spacing: -1px;
-        }
-
-        .hero p {
-            font-size: clamp(1.2rem, 3vw, 1.8rem);
-            margin-bottom: 2rem;
-            opacity: 0.95;
-        }
-
-        .hero-btn {
-            display: inline-block;
-            padding: 1.2rem 3rem;
-            background: var(--light);
-            color: var(--primary);
-            text-decoration: none;
-            border-radius: 50px;
-            font-weight: 600;
-            font-size: 1.1rem;
-            transition: all 0.3s ease;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-        }
-
-        .hero-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
-        }
-
-        /* 内容区块 */
-        .section {
-            padding: 6rem 5%;
-            position: relative;
-        }
-
-        .section-title {
-            font-size: clamp(2rem, 4vw, 3rem);
-            font-weight: 700;
-            margin-bottom: 1rem;
-            text-align: center;
-            color: var(--text-primary);
-        }
-
-        .section-subtitle {
-            font-size: 1.2rem;
-            color: var(--text-secondary);
-            text-align: center;
-            margin-bottom: 3rem;
-        }
-
-        /* 游戏卡片 */
-        .games-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 2rem;
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        .game-card {
-            background: var(--light);
-            border-radius: 20px;
-            box-shadow: var(--shadow-lg);
-            transition: all 0.4s ease;
-            position: relative;
-            cursor: pointer;
-        }
-
-        .game-card:hover {
-            transform: translateY(-10px) scale(1.05);
-            box-shadow: var(--shadow-xl);
-            z-index: 10;
-        }
-
-        .game-card-icon {
-            height: 200px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 4rem;
-            color: var(--light);
-            position: relative;
-            border-radius: 20px 20px 0 0;
-        }
-
-        .game-card-icon::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: inherit;
-            opacity: 0.9;
-            border-radius: 20px 20px 0 0;
-        }
-
-        .game-card-icon i {
-            position: relative;
-            z-index: 1;
-        }
-
-        .game-card:nth-child(1) .game-card-icon { background: var(--gradient-1); }
-        .game-card:nth-child(2) .game-card-icon { background: var(--gradient-2); }
-        .game-card:nth-child(3) .game-card-icon { background: var(--gradient-3); }
-        .game-card:nth-child(4) .game-card-icon { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
-
-        .game-card-content {
-            padding: 1.5rem;
-        }
-
-        .game-card h3 {
-            font-size: 1.5rem;
-            margin-bottom: 0.5rem;
-            color: var(--text-primary);
-        }
-
-        .game-card p {
-            color: var(--text-secondary);
-            font-size: 0.95rem;
-            margin-bottom: 1rem;
-        }
-
-        .game-card-btn {
-            display: inline-block;
-            padding: 0.8rem 2rem;
-            background: var(--gradient-1);
-            color: var(--light);
-            text-decoration: none;
-            border-radius: 25px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        .game-card-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
-
-        /* 工具区块 */
-        .tools-section {
-            background: #f7fafc;
-        }
-
-        .tools-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 2rem;
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        .tool-card {
-            background: var(--light);
-            padding: 2rem;
-            border-radius: 20px;
-            box-shadow: var(--shadow-lg);
-            transition: all 0.4s ease;
-            text-align: center;
-        }
-
-        .tool-card:hover {
-            transform: translateY(-10px) scale(1.05);
-            box-shadow: var(--shadow-xl);
-            z-index: 10;
-        }
-
-        .tool-icon {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 1.5rem;
-            background: var(--gradient-1);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2rem;
-            color: var(--light);
-        }
-
-        .tool-card:nth-child(2) .tool-icon {
-            background: var(--gradient-2);
-        }
-
-        .tool-card h3 {
-            font-size: 1.5rem;
-            margin-bottom: 0.5rem;
-            color: var(--text-primary);
-        }
-
-        .tool-card p {
-            color: var(--text-secondary);
-            margin-bottom: 1.5rem;
-        }
-
-        .tool-card-btn {
-            display: inline-block;
-            padding: 0.8rem 2rem;
-            background: var(--gradient-1);
-            color: var(--light);
-            text-decoration: none;
-            border-radius: 25px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        .tool-card-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
-
-        /* 页脚 */
-        .footer {
-            background: var(--dark);
-            color: var(--light);
-            padding: 4rem 5% 2rem;
-            text-align: center;
-        }
-
-        .footer-links {
-            display: flex;
-            justify-content: center;
-            gap: 2rem;
-            margin-bottom: 2rem;
-            flex-wrap: wrap;
-        }
-
-        .footer-links a {
-            color: var(--light);
-            text-decoration: none;
-            transition: opacity 0.3s ease;
-        }
-
-        .footer-links a:hover {
-            opacity: 0.8;
-        }
-
-        .footer p {
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 0.9rem;
-        }
-
-        /* 时间显示 */
         .time-display {
+            position: fixed;
+            top: 20px;
+            right: 20px;
             font-size: 18px;
-            color: var(--text-primary);
-            font-weight: 700;
-        }
-
-        /* 动画 */
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* 响应式设计 */
-        @media (max-width: 768px) {
-            .hamburger {
-                display: flex;
-            }
-
-            .nav-links {
-                position: fixed;
-                top: 0;
-                right: -100%;
-                width: 20%;
-                height: 100vh;
-                background: rgba(255, 255, 255, 0.98);
-                backdrop-filter: blur(10px);
-                flex-direction: column;
-                justify-content: center;
-                align-items: center;
-                gap: 2rem;
-                transition: right 0.3s ease;
-                box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
-            }
-
-            .nav-links.active {
-                right: 0;
-            }
-
-            .nav-links a {
-                font-size: 1.5rem;
-            }
-
-            .hero h1 {
-                font-size: 2rem;
-            }
-
-            .hero p {
-                font-size: 1.2rem;
-            }
-
-            .section {
-                padding: 4rem 5%;
-            }
-
-            .time-display {
-                top: 10px;
-                right: 10px;
-                font-size: 12px;
-                padding: 8px 15px;
-            }
-
-            .games-grid, .tools-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        /* 滚动动画 */
-        .fade-in {
-            opacity: 0;
-            margin-top: 30px;
-            transition: all 0.6s ease;
-        }
-
-        .fade-in.visible {
-            opacity: 1;
-            margin-top: 0;
+            color: white;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-weight: bold;
+            z-index: 100;
         }
     </style>
 </head>
 <body>
-    <!-- 导航栏 -->
-    <nav class="navbar">
-        <a href="#" class="logo">游戏中心</a>
-        <div class="time-display" id="timeDisplay"></div>
-        <div class="hamburger">
-            <span></span>
-            <span></span>
-            <span></span>
+    <div class="time-display" id="timeDisplay"></div>
+    <a href="index.html" style="position: absolute; top: 20px; left: 20px; padding: 10px 20px; background-color: #95a5a6; color: white; text-decoration: none; border-radius: 5px; font-family: 'Microsoft YaHei', sans-serif; z-index: 100;">返回</a>
+    <h1>🐍 贪吃蛇: 视听全能增强版</h1>
+
+    <div class="controls">
+        <div style="text-align: left;">
+            <div>得分: <span id="score" style="font-size: 20px; color: #f1c40f;">0</span></div>
+            <div style="font-size: 14px; opacity: 0.8;">最高分: <span id="highScore" style="color: #2ecc71;">0</span></div>
         </div>
-        <ul class="nav-links">
-            <li><a href="#games">游戏</a></li>
-            <li><a href="#tools">工具</a></li>
-            <li><a href="#about">关于</a></li>
-        </ul>
-    </nav>
-
-    <!-- 首屏 -->
-    <section class="hero">
-        <div class="hero-content">
-            <h1>精彩游戏，无限乐趣</h1>
-            <p>探索我们的精选游戏和实用工具，开启您的数字娱乐之旅</p>
-            <a href="#games" class="hero-btn">开始探索</a>
+        <div style="display: flex; gap: 8px;">
+            <select id="difficulty" onchange="updateDifficulty()">
+                <option value="150">入门</option>
+                <option value="100" selected>标准</option>
+                <option value="60">高手</option>
+            </select>
+            <button class="ui-btn btn-orange" onclick="togglePause()">暂停</button>
         </div>
-    </section>
+    </div>
+ 
+    <div class="cheat-container">
+        <button class="ui-btn" onclick="toggleCheatPanel()">⚙️ 设置与作弊菜单</button>
+        <div id="cheatPanel" class="cheat-panel">
+            <button class="ui-btn btn-green" onclick="addScore(100)">+100分</button>
+            <button class="ui-btn btn-green" onclick="growSnakeCheat(5)">增长[5]</button>
+            <button class="ui-btn btn-green" onclick="teleportToFood()">瞬移吃食</button>
+            <button class="ui-btn btn-red" onclick="toggleInvincible()">无敌: <span id="invincibleState">关</span></button>
+            <button class="ui-btn btn-red" onclick="toggleSuperSpeed()">超音速: <span id="speedState">关</span></button>
+            <button class="ui-btn" onclick="toggleBGM()">背景音乐: <span id="bgmState">关</span></button>
+            <button class="ui-btn" onclick="toggleMute()">所有音效: <span id="muteState">开</span></button>
+        </div>
+    </div>
 
-    <!-- 游戏区块 -->
-    <section class="section" id="games">
-        <h2 class="section-title">经典游戏</h2>
-        <p class="section-subtitle">精心挑选的经典游戏，带给您无尽的欢乐</p>
-
-        <div class="games-grid">
-            <div class="game-card fade-in">
-                <div class="game-card-icon">
-                    <i class="fas fa-gamepad"></i>
-                </div>
-                <div class="game-card-content">
-                    <h3>贪吃蛇</h3>
-                    <p>经典贪吃蛇游戏，重温童年回忆</p>
-                    <a href="gemini贪吃蛇双端通用.html" class="game-card-btn">立即游玩</a>
-                </div>
+    <div id="main-layout">
+        <div class="mobile-controls">
+            <button class="dpad-btn" id="btn-up">▲</button>
+            <div class="dpad-row">
+                <button class="dpad-btn" id="btn-left">◀</button>
+                <button class="dpad-btn" id="btn-down">▼</button>
+                <button class="dpad-btn" id="btn-right">▶</button>
             </div>
-
-            <div class="game-card fade-in">
-                <div class="game-card-icon">
-                    <i class="fas fa-dungeon"></i>
-                </div>
-                <div class="game-card-content">
-                    <h3>迷宫</h3>
-                    <p>挑战迷宫，考验您的智慧和耐心</p>
-                    <a href="迷宫小游戏.html" class="game-card-btn">立即游玩</a>
-                </div>
-            </div>
-
-            <div class="game-card fade-in">
-                <div class="game-card-icon">
-                    <i class="fas fa-puzzle-piece"></i>
-                </div>
-                <div class="game-card-content">
-                    <h3>猜数字</h3>
-                    <p>智力猜数字，挑战您的推理能力</p>
-                    <a href="猜数字.html" class="game-card-btn">立即游玩</a>
-                </div>
-            </div>
-
-            <div class="game-card fade-in">
-                <div class="game-card-icon">
-                    <i class="fas fa-bomb"></i>
-                </div>
-                <div class="game-card-content">
-                    <h3>扫雷</h3>
-                    <p>经典扫雷游戏，考验您的观察力</p>
-                    <a href="minesweeper.html" class="game-card-btn">立即游玩</a>
-                </div>
+            <div style="margin-top: 10px; font-size: 12px; opacity: 0.7;">
+                🟡10分(长1) 🟣20分(长2) 🔴50分(长5)
             </div>
         </div>
-    </section>
 
-    <!-- 工具区块 -->
-    <section class="section tools-section" id="tools">
-        <h2 class="section-title">实用工具</h2>
-        <p class="section-subtitle">便捷实用的小工具，提升您的工作效率</p>
-
-        <div class="tools-grid">
-            <div class="tool-card fade-in">
-                <div class="tool-icon">
-                    <i class="fas fa-calculator"></i>
-                </div>
-                <h3>计数器</h3>
-                <p>简单实用的计数工具，满足您的计数需求</p>
-                <a href="按钮加减.html" class="tool-card-btn">立即使用</a>
-            </div>
-
-            <div class="tool-card fade-in">
-                <div class="tool-icon">
-                    <i class="fas fa-tools"></i>
-                </div>
-                <h3>实用网页</h3>
-                <p>精选实用网页集合，一站式服务</p>
-                <a href="实用网页.html" class="tool-card-btn">立即查看</a>
+        <div id="game-container">
+            <canvas id="gameCanvas" width="600" height="600"></canvas>
+            <div id="overlay">
+                <div id="msg" style="font-size: 24px; margin-bottom: 10px;">准备开饭了吗？</div>
+                <button id="startBtn" onclick="startGame()">开始游戏</button>
+                <button id="settleBtn" class="ui-btn settle-btn btn-orange" onclick="immediateSettle()">立即结算得分</button>
             </div>
         </div>
-    </section>
-
-    <!-- 关于区块 -->
-    <section class="section" id="about">
-        <h2 class="section-title">关于我们</h2>
-        <p class="section-subtitle">致力于为您提供最好的游戏体验</p>
-        <div style="max-width: 800px; margin: 0 auto; text-align: center; color: var(--text-secondary); line-height: 1.8;">
-            <p>游戏中心是一个专注于提供优质在线游戏和实用工具的平台。我们精选各类经典游戏和实用工具，致力于为用户创造愉快的数字娱乐体验。</p>
-        </div>
-    </section>
-
-    <!-- 页脚 -->
-    <footer class="footer">
-        <div class="footer-links">
-            <a href="#games">游戏</a>
-            <a href="#tools">工具</a>
-            <a href="#about">关于</a>
-        </div>
-        <p>&copy; 2026 游戏中心. All rights reserved.</p>
-    </footer>
+    </div>
 
     <script>
-        // 时间更新
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+        const scoreElement = document.getElementById("score");
+        const highScoreElement = document.getElementById("highScore");
+        const overlay = document.getElementById("overlay");
+        const msg = document.getElementById("msg");
+        const difficultySelect = document.getElementById("difficulty");
+        const settleBtn = document.getElementById("settleBtn");
+        const startBtn = document.getElementById("startBtn");
+
+        const grid = 20;
+        let snake, foods, dx, dy, score, gameLoop;
+        let pendingGrowth = 0;
+        let highScore = localStorage.getItem('snakeHighScore') || 0;
+        let isPaused = false, isGameOver = true;
+        let invincible = false, isSuperSpeed = false, isMuted = false, bgmEnabled = false;
+
+        highScoreElement.innerText = highScore;
+
+        /* --- 🎵 声音引擎 (音量增强版) --- */
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        let bgmInterval = null;
+        let bgmStep = 0;
+        const melody = [261, 196, 261, 329, 392, 329, 261, 196, 293, 220, 293, 349, 440, 349, 293, 220];
+
+        function playSound(freq, type, duration, vol = 0.1) {
+            if (isMuted) return;
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+                // 线性衰减让声音更清脆
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+                osc.connect(gain); gain.connect(audioCtx.destination);
+                osc.start(); osc.stop(audioCtx.currentTime + duration);
+            } catch(e) {}
+        }
+
+        const sfx = {
+            eat10: () => playSound(600, 'sine', 0.1, 0.2),
+            eat20: () => playSound(800, 'sine', 0.1, 0.2),
+            eat50: () => { playSound(1000, 'sine', 0.1, 0.2); setTimeout(()=>playSound(1200, 'sine', 0.1, 0.2), 50); },
+            gameOver: () => { playSound(300, 'square', 0.4, 0.1); playSound(150, 'square', 0.6, 0.1); },
+            click: () => playSound(440, 'triangle', 0.05, 0.1)
+        };
+
+        function startBGM() {
+            if (bgmInterval) clearInterval(bgmInterval);
+            if (!bgmEnabled) return;
+            bgmInterval = setInterval(() => {
+                if (isPaused || isGameOver) return;
+                // BGM音量由 0.02 提升至 0.08，约 4 倍响度
+                playSound(melody[bgmStep], 'triangle', 0.18, 0.08);
+                bgmStep = (bgmStep + 1) % melody.length;
+            }, 200);
+        }
+
+        function stopBGM() { clearInterval(bgmInterval); bgmInterval = null; }
+
+        /* --- ⚙️ 系统功能 --- */
+        function toggleCheatPanel() {
+            sfx.click();
+            const panel = document.getElementById('cheatPanel');
+            panel.style.display = (panel.style.display === 'flex') ? 'none' : 'flex';
+        }
+
+        function addScore(amount) {
+            if (isGameOver) return;
+            score += amount;
+            scoreElement.innerText = score;
+            sfx.eat50();
+            checkHighScore();
+        }
+
+        function growSnakeCheat(amount) {
+            if (isGameOver) return;
+            pendingGrowth += amount;
+            sfx.click();
+        }
+
+        function teleportToFood() {
+            if (isGameOver || foods.length === 0) return;
+            const idx = Math.floor(Math.random() * foods.length);
+            const f = foods[idx];
+            snake[0] = { x: f.x, y: f.y };
+            handleEat(idx);
+        }
+
+        function toggleInvincible() {
+            invincible = !invincible;
+            sfx.click();
+            document.getElementById('invincibleState').innerText = invincible ? '开' : '关';
+        }
+
+        function toggleSuperSpeed() {
+            if (isGameOver) return;
+            isSuperSpeed = !isSuperSpeed;
+            sfx.click();
+            document.getElementById('speedState').innerText = isSuperSpeed ? "开" : "关";
+            setLoop(isSuperSpeed ? 35 : parseInt(difficultySelect.value));
+        }
+
+        function toggleBGM() {
+            bgmEnabled = !bgmEnabled;
+            sfx.click();
+            document.getElementById('bgmState').innerText = bgmEnabled ? "开" : "关";
+            if (bgmEnabled && !isGameOver && !isPaused) startBGM(); else stopBGM();
+        }
+
+        function toggleMute() {
+            isMuted = !isMuted;
+            sfx.click();
+            document.getElementById('muteState').innerText = isMuted ? "关" : "开";
+        }
+
+        function updateDifficulty() {
+            if (!isGameOver && !isPaused && !isSuperSpeed) {
+                setLoop(parseInt(difficultySelect.value));
+            }
+        }
+
+        /* --- 游戏主流程 --- */
+        function startGame() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            sfx.click();
+            resetData();
+            overlay.style.display = "none";
+            setLoop(isSuperSpeed ? 35 : parseInt(difficultySelect.value));
+            startBGM();
+        }
+
+        function resetData() {
+            snake = [{x: 160, y: 200}, {x: 140, y: 200}, {x: 120, y: 200}];
+            foods = []; pendingGrowth = 0; dx = grid; dy = 0; score = 0;
+            for(let i=0; i<3; i++) createFood();
+            scoreElement.innerText = "0";
+            isPaused = false; isGameOver = false;
+        }
+
+        function createFood() {
+            let rand = Math.random();
+            let type = rand < 0.2 ? {c:'#e74c3c', p:50, g:5, s:'eat50'} : 
+                       rand < 0.5 ? {c:'#9b59b6', p:20, g:2, s:'eat20'} : 
+                                    {c:'#f1c40f', p:10, g:1, s:'eat10'};
+            const newF = { x: Math.floor(Math.random() * (canvas.width / grid)) * grid, 
+                           y: Math.floor(Math.random() * (canvas.height / grid)) * grid, ...type };
+            if (snake.some(p => p.x === newF.x && p.y === newF.y)) createFood();
+            else foods.push(newF);
+        }
+
+        function main() {
+            if (isPaused) return;
+            if (checkGameOver()) {
+                endGame("Game Over!");
+                return;
+            }
+            advanceSnake();
+            draw();
+        }
+
+        function advanceSnake() {
+            let h = { x: snake[0].x + dx, y: snake[0].y + dy };
+            if (invincible) {
+                if (h.x < 0) h.x = canvas.width - grid; else if (h.x >= canvas.width) h.x = 0;
+                if (h.y < 0) h.y = canvas.height - grid; else if (h.y >= canvas.height) h.y = 0;
+            }
+            snake.unshift(h);
+            let fi = foods.findIndex(f => f.x === h.x && f.y === h.y);
+            if (fi !== -1) handleEat(fi);
+            else if (pendingGrowth > 0) pendingGrowth--;
+            else snake.pop();
+        }
+
+        function handleEat(i) {
+            let f = foods[i];
+            score += f.p;
+            scoreElement.innerText = score;
+            sfx[f.s]();
+            pendingGrowth += (f.g - 1);
+            checkHighScore();
+            foods.splice(i, 1);
+            createFood();
+        }
+
+        function checkGameOver() {
+            if (invincible) return false;
+            let h = snake[0];
+            if (h.x < 0 || h.x >= canvas.width || h.y < 0 || h.y >= canvas.height) return true;
+            for (let i = 1; i < snake.length; i++) if (h.x === snake[i].x && h.y === snake[i].y) return true;
+            return false;
+        }
+
+        function togglePause() {
+            if (isGameOver) return;
+            isPaused = !isPaused;
+            sfx.click();
+            if (isPaused) {
+                overlay.style.display = "flex";
+                msg.innerText = "游戏暂停中";
+                settleBtn.style.display = "block";
+                startBtn.innerText = "继续游戏";
+                startBtn.onclick = resumeGame;
+            } else {
+                overlay.style.display = "none";
+                msg.innerText = "";
+                settleBtn.style.display = "none";
+                startBtn.innerText = "开始游戏";
+                startBtn.onclick = startGame;
+            }
+        }
+
+        function resumeGame() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            sfx.click();
+            isPaused = false;
+            overlay.style.display = "none";
+            startBtn.onclick = startGame;
+            startBGM();
+        }
+
+        function immediateSettle() { endGame("手动结算成绩"); }
+
+        function endGame(txt) {
+            isGameOver = true;
+            clearInterval(gameLoop);
+            stopBGM();
+            sfx.gameOver();
+            overlay.style.display = "flex";
+            msg.innerText = txt + " 得分: " + score;
+            settleBtn.style.display = "none";
+            startBtn.innerText = "再来一局";
+        }
+
+        function checkHighScore() {
+            if (score > highScore) {
+                highScore = score;
+                highScoreElement.innerText = highScore;
+                localStorage.setItem('snakeHighScore', highScore);
+            }
+        }
+
+        function draw() {
+            ctx.fillStyle = "#34495e"; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            foods.forEach(f => {
+                ctx.fillStyle = f.c; ctx.shadowBlur = 10; ctx.shadowColor = f.c;
+                ctx.fillRect(f.x + 1, f.y + 1, grid - 2, grid - 2);
+            });
+            ctx.shadowBlur = 0;
+            for (let i = 1; i < snake.length; i++) {
+                ctx.fillStyle = "#2ecc71"; ctx.fillRect(snake[i].x + 1, snake[i].y + 1, grid - 2, grid - 2);
+            }
+            ctx.fillStyle = invincible ? "#00d2ff" : "#f39c12"; 
+            ctx.fillRect(snake[0].x + 1, snake[0].y + 1, grid - 2, grid - 2);
+        }
+
+        function setLoop(ms) { if (gameLoop) clearInterval(gameLoop); gameLoop = setInterval(main, ms); }
+        
+        function changeDirection(nx, ny) {
+            if (isPaused || isGameOver) return;
+            if (dx === 0 && nx !== 0) { dx = nx; dy = 0; }
+            if (dy === 0 && ny !== 0) { dx = 0; dy = ny; }
+        }
+
+        // 按钮绑定
+        const bind = (id, x, y) => document.getElementById(id).addEventListener('pointerdown', e => { 
+            e.preventDefault(); changeDirection(x, y); 
+        }, {passive:false});
+        bind('btn-up', 0, -grid); bind('btn-down', 0, grid); bind('btn-left', -grid, 0); bind('btn-right', grid, 0);
+
+        // 键盘绑定
+        document.addEventListener("keydown", e => {
+            const keys = {32: 'p', 37: [-grid, 0], 38: [0, -grid], 39: [grid, 0], 40: [0, grid]};
+            if (keys[e.keyCode]) {
+                e.preventDefault();
+                if (keys[e.keyCode] === 'p') togglePause();
+                else changeDirection(...keys[e.keyCode]);
+            }
+        });
+
         function updateTime() {
             const now = new Date();
             const year = now.getFullYear();
@@ -691,60 +453,6 @@ var _hmt = _hmt || [];
 
         updateTime();
         setInterval(updateTime, 1000);
-
-        // 汉堡包菜单切换
-        const hamburger = document.querySelector('.hamburger');
-        const navLinks = document.querySelector('.nav-links');
-
-        hamburger.addEventListener('click', () => {
-            hamburger.classList.toggle('active');
-            navLinks.classList.toggle('active');
-        });
-
-        // 点击导航链接后关闭菜单
-        document.querySelectorAll('.nav-links a').forEach(link => {
-            link.addEventListener('click', () => {
-                hamburger.classList.remove('active');
-                navLinks.classList.remove('active');
-            });
-        });
-
-        // 点击空白处关闭菜单
-        document.addEventListener('click', (e) => {
-            if (!navLinks.contains(e.target) && !hamburger.contains(e.target)) {
-                hamburger.classList.remove('active');
-                navLinks.classList.remove('active');
-            }
-        });
-
-        // 导航栏滚动效果
-        window.addEventListener('scroll', function() {
-            const navbar = document.querySelector('.navbar');
-            if (window.scrollY > 50) {
-                navbar.classList.add('scrolled');
-            } else {
-                navbar.classList.remove('scrolled');
-            }
-        });
-
-        // 滚动动画
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
-        };
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                    observer.unobserve(entry.target);
-                }
-            });
-        }, observerOptions);
-
-        document.querySelectorAll('.fade-in').forEach(el => {
-            observer.observe(el);
-        });
     </script>
 </body>
 </html>
