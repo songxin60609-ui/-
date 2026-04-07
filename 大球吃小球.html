@@ -1,0 +1,2319 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>大球吃小球大作战</title>
+    <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?43572d67ab5bd2cb80169add393b5373";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+    </script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #f0f0f0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        canvas {
+            display: block;
+        }
+        #ui {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            pointer-events: none;
+            color: #333;
+            text-shadow: 1px 1px 2px rgba(255,255,255,0.8);
+        }
+        #scoreBoard {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        #rankBoard {
+            font-size: 16px;
+            background: rgba(255, 255, 255, 0.7);
+            padding: 10px;
+            border-radius: 8px;
+        }
+        #minimap {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 150px;
+            height: 150px;
+            background: rgba(255, 255, 255, 0.8);
+            border: 2px solid #333;
+            border-radius: 8px;
+            overflow: hidden;
+            pointer-events: none;
+        }
+        #minimapCanvas {
+            width: 100%;
+            height: 100%;
+        }
+        #pauseBtn {
+            position: absolute;
+            top: 20px;
+            right: 180px;
+            padding: 8px 15px;
+            font-size: 16px;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 100;
+            pointer-events: auto;
+        }
+        #pauseBtn:hover {
+            background: rgba(0, 0, 0, 0.8);
+        }
+        #cheatBtn {
+            position: absolute;
+            top: 20px;
+            right: 260px;
+            padding: 8px 15px;
+            font-size: 16px;
+            background: rgba(255, 100, 100, 0.8);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 100;
+            pointer-events: auto;
+        }
+        #cheatBtn:hover {
+            background: rgba(255, 100, 100, 1);
+        }
+        #cheatMenu {
+            position: absolute;
+            top: 60px;
+            right: 260px;
+            background: rgba(0, 0, 0, 0.85);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            z-index: 150;
+            min-width: 150px;
+        }
+        .cheat-item {
+            margin: 10px 0;
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .cheat-item:last-child {
+            border-bottom: none;
+        }
+        .cheat-item button {
+            width: 100%;
+            padding: 8px;
+            background: rgba(255, 100, 100, 0.8);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .cheat-item button:hover {
+            background: rgba(255, 100, 100, 1);
+        }
+        .cheat-item label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        .cheat-item input[type="checkbox"] {
+            margin-right: 10px;
+        }
+        #pauseScreen {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.85);
+            color: white;
+            padding: 40px;
+            border-radius: 15px;
+            text-align: center;
+            display: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            z-index: 200;
+        }
+        #pauseScreen h1 { margin-top: 0; }
+        #pauseScreen .btn-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        #pauseScreen button {
+            padding: 12px 25px;
+            font-size: 18px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        #resumeBtn {
+            background: #4CAF50;
+            color: white;
+        }
+        #resumeBtn:hover { background: #45a049; }
+        #restartBtn {
+            background: #2196F3;
+            color: white;
+        }
+        #restartBtn:hover { background: #0b7dda; }
+        #mainMenuBtn {
+            background: #ff9800;
+            color: white;
+        }
+        #mainMenuBtn:hover { background: #e68900; }
+        #gameOver {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 40px;
+            border-radius: 15px;
+            text-align: center;
+            display: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        #gameOver h1 { margin-top: 0; }
+        button {
+            padding: 10px 25px;
+            font-size: 18px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        button:hover { background: #45a049; }
+
+        /* 主界面样式 */
+        #startScreen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 300;
+        }
+
+        #startScreen h1 {
+            font-size: 60px;
+            color: white;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        #startScreen .subtitle {
+            font-size: 24px;
+            color: rgba(255,255,255,0.9);
+            margin-bottom: 40px;
+        }
+
+        #startScreen .game-info {
+            background: rgba(255,255,255,0.2);
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 40px;
+            max-width: 500px;
+            text-align: left;
+        }
+
+        #startScreen .game-info h3 {
+            color: white;
+            margin-top: 0;
+            border-bottom: 2px solid rgba(255,255,255,0.5);
+            padding-bottom: 10px;
+        }
+
+        #startScreen .game-info ul {
+            color: white;
+            line-height: 1.8;
+            padding-left: 20px;
+        }
+
+        #startScreen .start-btn {
+            padding: 15px 50px;
+            font-size: 24px;
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            transition: all 0.3s;
+        }
+
+        #startScreen .start-btn:hover {
+            background: #ff5252;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+        }
+
+        /* 背景动画元素 */
+        .floating-circle {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.3;
+            animation: float 15s infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+            100% { transform: translateY(0) rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="startScreen">
+        <div class="floating-circle" style="width: 100px; height: 100px; background: #ff6b6b; top: 10%; left: 10%;"></div>
+        <div class="floating-circle" style="width: 150px; height: 150px; background: #4ecdc4; top: 20%; right: 15%;"></div>
+        <div class="floating-circle" style="width: 80px; height: 80px; background: #ffe66d; bottom: 20%; left: 20%;"></div>
+        <div class="floating-circle" style="width: 120px; height: 120px; background: #95e1d3; bottom: 30%; right: 10%;"></div>
+        <div class="floating-circle" style="width: 60px; height: 60px; background: #f38181; top: 40%; left: 5%;"></div>
+
+        <a href="index.html" style="position: absolute; top: 20px; left: 20px; padding: 10px 20px; background: rgba(255, 255, 255, 0.3); color: white; border: 2px solid white; border-radius: 25px; cursor: pointer; text-decoration: none; z-index: 310; font-size: 16px; transition: all 0.3s; backdrop-filter: blur(5px);">
+            <i class="fas fa-arrow-left"></i> 返回
+        </a>
+
+        <h1>大球吃小球大作战</h1>
+        <p class="subtitle">吞噬一切，成为最大的球！</p>
+
+        <div class="game-info">
+            <h3 style="text-align: center;">游戏规则</h3>
+            <ul>
+                <li>使用鼠标控制你的球移动</li>
+                <li>吃掉比你小的球来成长</li>
+                <li>吃掉小彩豆获得积分</li>
+                <li>避开比你大的球，否则会被吃掉</li>
+            </ul>
+        </div>
+
+        <button class="start-btn" onclick="startGame()">开始游戏</button>
+    </div>
+
+    <div id="ui">
+        <div id="scoreBoard">体积: 10</div>
+        <div id="rankBoard">
+            <strong>排行榜</strong>
+            <ol id="leaderboardList"></ol>
+        </div>
+    </div>
+
+    <a href="index.html" id="backBtn" style="position: absolute; top: 20px; left: 20px; padding: 10px 20px; background: rgba(0, 0, 0, 0.6); color: white; border: none; border-radius: 5px; cursor: pointer; text-decoration: none; z-index: 100; font-size: 16px; transition: background 0.3s;">
+        <i class="fas fa-arrow-left"></i> 返回
+    </a>
+
+    <button id="pauseBtn">暂停</button>
+    <button id="cheatBtn">作弊</button>
+    <div id="cheatMenu" style="display: none;">
+        <div class="cheat-item">
+            <label><input type="checkbox" id="invincibleToggle"> 无敌模式</label>
+        </div>
+        <div class="cheat-item">
+            <label><input type="checkbox" id="flashRecombineToggle"> 闪合(1秒合球)</label>
+        </div>
+        <div class="cheat-item">
+            <button onclick="cheatAdd100()">体积+100</button>
+        </div>
+        <div class="cheat-item">
+            <button onclick="cheatDouble()">体积翻倍</button>
+        </div>
+        <div class="cheat-item">
+            <button onclick="cheatSubtract100()">体积-100</button>
+        </div>
+        <div class="cheat-item">
+            <button onclick="cheatHalf()">体积减半</button>
+        </div>
+        <div class="cheat-item">
+            <label>吸铁石范围: <input type="number" id="magnetRange" min="1" max="9999" value="500" style="width: 80px;" oninput="validateMagnetRange(this)"></label>
+            <button onclick="cheatMagnet()">吸铁石</button>
+        </div>
+        <div class="cheat-item">
+            <label>加速倍率: <input type="number" id="speedMultiplier" min="1" max="10" value="2" style="width: 80px;" oninput="validateSpeedMultiplier(this)"></label>
+            <button onclick="cheatSpeed()">加速</button>
+        </div>
+    </div>
+
+    <div id="minimap">
+        <canvas id="minimapCanvas"></canvas>
+    </div>
+
+    <div id="pauseScreen">
+        <h1>游戏暂停</h1>
+        <div class="btn-group">
+            <button id="resumeBtn">继续游戏</button>
+            <button id="restartBtn">重新开始</button>
+            <button id="mainMenuBtn">返回主界面</button>
+        </div>
+    </div>
+
+    <div id="gameOver">
+        <h1>游戏结束!</h1>
+        <p>你的最终体积: <span id="finalScore">0</span></p>
+        <button onclick="restartGame()">再来一局</button>
+    </div>
+
+    <canvas id="gameCanvas"></canvas>
+
+<script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    // UI Elements
+    const scoreBoard = document.getElementById('scoreBoard');
+    const gameOverScreen = document.getElementById('gameOver');
+    const finalScoreEl = document.getElementById('finalScore');
+    const leaderboardList = document.getElementById('leaderboardList');
+    const pauseBtn = document.getElementById('pauseBtn');
+    const pauseScreen = document.getElementById('pauseScreen');
+    const resumeBtn = document.getElementById('resumeBtn');
+    const restartBtn = document.getElementById('restartBtn');
+    const mainMenuBtn = document.getElementById('mainMenuBtn');
+
+    // 小地图元素
+    const minimapCanvas = document.getElementById('minimapCanvas');
+    const minimapCtx = minimapCanvas.getContext('2d');
+    let minimapSize = 150; // 小地图尺寸
+
+    // 游戏状态变量
+    let isPaused = false;
+
+    // 初始化小地图画布大小
+    function initMinimap() {
+        minimapCanvas.width = minimapSize;
+        minimapCanvas.height = minimapSize;
+    }
+    initMinimap();
+
+    // 暂停游戏
+    function pauseGame() {
+        if (isGameOver) return;
+        isPaused = true;
+        pauseScreen.style.display = 'block';
+        cancelAnimationFrame(animationId);
+    }
+
+    // 继续游戏
+    function resumeGame() {
+        if (isGameOver) return;
+        isPaused = false;
+        pauseScreen.style.display = 'none';
+        gameLoop();
+    }
+
+    // 返回主界面
+    function returnToMainMenu() {
+        isPaused = false;
+        isGameOver = true;
+        pauseScreen.style.display = 'none';
+        gameOverScreen.style.display = 'none';
+        document.getElementById('startScreen').style.display = 'flex';
+    }
+
+    // 按钮事件监听
+    pauseBtn.addEventListener('click', pauseGame);
+    resumeBtn.addEventListener('click', resumeGame);
+    restartBtn.addEventListener('click', restartGame);
+    mainMenuBtn.addEventListener('click', returnToMainMenu);
+
+    // 游戏全局配置
+    const WORLD_SIZE = 6000; 
+    const INIT_PLAYER_RADIUS = 20;
+    const FOOD_COUNT = 4000;
+    const BOT_COUNT = 30;
+
+    // 游戏状态变量
+    let width, height;
+    let camera = { x: 0, y: 0, scale: 1, targetScale: 1 };
+    let mouse = { x: 0, y: 0 };
+    let isGameOver = false;
+    let animationId;
+    let frameCount = 0;
+
+    // 孢子相关
+    let spores = [];
+    const SPORE_RADIUS = 12; // 孢子半径，比彩豆(3-6)大
+    const MAX_CELLS = 16;
+
+    // 刺刺球相关
+    let spikes = [];
+    const SPIKE_COUNT = 100; // 刺刺球数量
+    const SPIKE_RADIUS = 50; // 刺刺球半径
+    const SPIKE_COLOR = '#FFD700'; // 刺刺球颜色（金色）
+
+    // 刺刺球类
+    class Spike {
+        constructor(x, y, radius) {
+            this.x = x;
+            this.y = y;
+            this.radius = radius;
+            this.color = SPIKE_COLOR;
+            this.rotation = Math.random() * Math.PI * 2; // 初始旋转角度
+            this.rotationSpeed = (Math.random() - 0.5) * 0.02; // 旋转速度
+        }
+
+        update() {
+            this.rotation += this.rotationSpeed;
+        }
+
+        draw(ctx) {
+            ctx.save();
+            ctx.translate(this.x, this.y);
+            ctx.rotate(this.rotation);
+
+            // 绘制刺刺球的主体
+            ctx.beginPath();
+            ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
+            ctx.fillStyle = this.color;
+            ctx.fill();
+
+            // 绘制刺
+            const numSpikes = 12; // 刺的数量
+            for (let i = 0; i < numSpikes; i++) {
+                const angle = (i / numSpikes) * Math.PI * 2;
+                const spikeLength = this.radius * 0.6;
+
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.lineTo(
+                    Math.cos(angle) * (this.radius + spikeLength),
+                    Math.sin(angle) * (this.radius + spikeLength)
+                );
+                ctx.lineTo(
+                    Math.cos(angle + 0.1) * this.radius,
+                    Math.sin(angle + 0.1) * this.radius
+                );
+                ctx.lineTo(
+                    Math.cos(angle - 0.1) * this.radius,
+                    Math.sin(angle - 0.1) * this.radius
+                );
+                ctx.closePath();
+                ctx.fillStyle = this.color;
+                ctx.fill();
+            }
+
+            ctx.restore();
+        }
+    }
+
+    // 孢子类
+    class Spore {
+        constructor(x, y, color) {
+            this.x = x;
+            this.y = y;
+            this.radius = SPORE_RADIUS;
+            this.color = color;
+            this.velocityX = 0;
+            this.velocityY = 0;
+            this.life = 0;
+        }
+
+        update() {
+            this.x += this.velocityX;
+            this.y += this.velocityY;
+            this.life++;
+
+            // 慢慢减速
+            this.velocityX *= 0.95;
+            this.velocityY *= 0.95;
+
+            // 边界检测
+            this.x = Math.max(this.radius, Math.min(WORLD_SIZE - this.radius, this.x));
+            this.y = Math.max(this.radius, Math.min(WORLD_SIZE - this.radius, this.y));
+        }
+
+        draw(ctx) {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+            ctx.fillStyle = this.color;
+            ctx.fill();
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = '#000';
+            ctx.stroke();
+        }
+    }
+
+    // 实体数组
+    let player;
+    let foods = [];
+    let bots = [];
+
+    // 颜色库
+    const colors = ['#FF5733', '#33FF57', '#3357FF', '#FF33F5', '#33FFF5', '#F5FF33', '#FF8C33', '#8C33FF'];
+
+    // 调整画布大小
+    function resize() {
+        width = window.innerWidth;
+        height = window.innerHeight;
+        canvas.width = width;
+        canvas.height = height;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    // 鼠标移动监听 (记录相对于屏幕中心的坐标)
+    window.addEventListener('mousemove', (e) => {
+        mouse.x = e.clientX - width / 2;
+        mouse.y = e.clientY - height / 2;
+    });
+
+    // 滚轮缩放监听
+    window.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        const zoomSpeed = 0.002;
+
+        // 根据滚轮方向调整目标缩放比例（使用乘法实现自由缩放）
+        if (e.deltaY < 0) {
+            // 向上滚动，放大
+            camera.targetScale *= (1 + zoomSpeed * 20);
+        } else {
+            // 向下滚动，缩小
+            camera.targetScale *= (1 - zoomSpeed * 20);
+        }
+
+        // 限制缩放范围
+        // 最小缩放比例：刚好能显示游戏全场地
+        const minScale = Math.min(width, height) / WORLD_SIZE;
+
+        // 最大缩放比例：刚好能显示玩家本身（留出一些边距）
+        let maxScale = 1;
+        if (player && player.cells && player.cells.length > 0) {
+            // 计算玩家的最大半径
+            let maxRadius = 0;
+            for (let cell of player.cells) {
+                if (cell.targetRadius > maxRadius) {
+                    maxRadius = cell.targetRadius;
+                }
+            }
+            // 最大缩放比例：屏幕尺寸 / (玩家半径 * 2 * 1.2)，1.2是边距系数
+            maxScale = Math.min(width, height) / (maxRadius * 2 * 1.2);
+        }
+
+        // 应用缩放限制
+        camera.targetScale = Math.max(minScale, Math.min(maxScale, camera.targetScale));
+    }, { passive: false });
+
+    // 键盘事件监听
+    window.addEventListener('keydown', (e) => {
+        if (isGameOver || isPaused) return;
+
+        // 空格键分身
+        if (e.code === 'Space') {
+            e.preventDefault();
+            player.split();
+        }
+
+        // W键吐孢子
+        if (e.code === 'KeyW') {
+            e.preventDefault();
+            player.ejectSpore();
+        }
+    });
+
+    // 实体基类
+    class Entity {
+        constructor(x, y, radius, color, name) {
+            this.x = x;
+            this.y = y;
+            this.radius = radius;
+            this.targetRadius = radius; // 目标半径
+            this.color = color;
+            this.name = name;
+            this.targetX = x;
+            this.targetY = y;
+            // 初始化变形数据（36个点，每10度一个点）
+            this.deformation = new Array(36).fill(1);
+            // 目标变形（用于平滑过渡）
+            this.targetDeformation = new Array(36).fill(1);
+            // 弹性变形的弹簧系数
+            this.springStiffness = 0.4;
+            // 弹性变形的阻尼系数
+            this.springDamping = 0.9;
+            // 变形速度
+            this.deformationVelocity = new Array(36).fill(0);
+            // 移动速度向量
+            this.velocityX = 0;
+            this.velocityY = 0;
+            // 记录上一帧位置
+            this.lastX = x;
+            this.lastY = y;
+            // 标记哪些点是由墙壁碰撞控制的
+            this.wallCollisionDeformation = new Array(36).fill(false);
+        }
+
+        draw(ctx) {
+            ctx.beginPath();
+
+            // 如果有挤压变形数据，绘制变形后的形状
+            if (this.deformation && this.deformation.length > 0) {
+                // 使用直线连接多个点来绘制变形后的形状
+                const numPoints = this.deformation.length;
+                for (let i = 0; i <= numPoints; i++) {
+                    const angle = (i / numPoints) * Math.PI * 2;
+                    const r = this.radius * this.deformation[i % numPoints];
+                    const x = this.x + Math.cos(angle) * r;
+                    const y = this.y + Math.sin(angle) * r;
+
+                    if (i === 0) {
+                        ctx.moveTo(x, y);
+                    } else {
+                        ctx.lineTo(x, y);
+                    }
+                }
+                ctx.closePath();
+            } else {
+                // 没有变形，绘制普通圆形
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+            }
+
+            ctx.fillStyle = this.color;
+            ctx.fill();
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = '#000';
+            ctx.stroke();
+
+            // 绘制名字
+            if (this.name && this.radius > 15) {
+                ctx.fillStyle = '#000';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                let fontSize = Math.max(12, this.radius / 3);
+                ctx.font = `bold ${fontSize}px sans-serif`;
+                ctx.fillText(this.name, this.x, this.y);
+            }
+        }
+
+        // 更新半径动画
+        updateRadius() {
+            // 平滑过渡到目标半径
+            const diff = this.targetRadius - this.radius;
+            if (Math.abs(diff) > 0.1) {
+                this.radius += diff * 0.1; // 0.1是平滑系数，越小越平滑
+            } else {
+                this.radius = this.targetRadius;
+            }
+        }
+
+        // 更新弹性变形
+        updateDeformation() {
+            let hasDeformation = false;
+            for (let i = 0; i < this.deformation.length; i++) {
+                // 如果该点是由墙壁碰撞控制的，则跳过更新
+                if (this.wallCollisionDeformation[i]) {
+                    hasDeformation = true;
+                    continue;
+                }
+
+                // 计算弹簧力
+                const springForce = (this.targetDeformation[i] - this.deformation[i]) * this.springStiffness;
+
+                // 更新速度（弹簧力 - 阻尼）
+                this.deformationVelocity[i] += springForce;
+                this.deformationVelocity[i] *= this.springDamping;
+
+                // 更新变形
+                this.deformation[i] += this.deformationVelocity[i];
+
+                // 限制变形范围，防止过度变形
+                this.deformation[i] = Math.max(0.5, Math.min(1.5, this.deformation[i]));
+
+                // 检查是否有变形
+                if (Math.abs(this.deformation[i] - 1) > 0.01) {
+                    hasDeformation = true;
+                }
+            }
+            return hasDeformation;
+        }
+
+        // 应用移动方向的变形（类似Agar.io的效果）
+        applyMovementDeformation() {
+            // 计算移动速度
+            const dx = this.x - this.lastX;
+            const dy = this.y - this.lastY;
+            const speed = Math.hypot(dx, dy);
+
+            // 如果速度太小，不应用变形
+            if (speed < 0.5) return;
+
+            // 计算移动方向
+            const moveAngle = Math.atan2(dy, dx);
+
+            // 计算变形强度（速度越快，变形越明显）
+            const deformStrength = Math.min(speed / this.radius * 0.5, 0.2);
+
+            // 对目标变形应用移动方向的变形
+            for (let k = 0; k < this.targetDeformation.length; k++) {
+                // 跳过由墙壁碰撞控制的点
+                if (this.wallCollisionDeformation[k]) {
+                    continue;
+                }
+
+                const pointAngle = (k / this.targetDeformation.length) * Math.PI * 2;
+                // 计算角度差，考虑周期性
+                let angleDiff = Math.abs(pointAngle - moveAngle);
+                if (angleDiff > Math.PI) {
+                    angleDiff = Math.PI * 2 - angleDiff;
+                }
+
+                // 使用余弦函数创建平滑的变形曲线
+                // 在移动方向（角度差为0）拉伸，在垂直方向（角度差为π/2）压缩
+                const deformFactor = Math.cos(angleDiff);
+
+                // 应用变形：在移动方向拉伸，在垂直方向压缩
+                const currentValue = this.targetDeformation[k];
+                const targetValue = currentValue + deformFactor * deformStrength;
+
+                // 更新目标变形
+                this.targetDeformation[k] = targetValue;
+            }
+
+            // 更新上一帧位置
+            this.lastX = this.x;
+            this.lastY = this.y;
+        }
+
+        // 吃掉其他实体的逻辑：按面积计算增长
+        eat(other) {
+            const area1 = Math.PI * this.targetRadius * this.targetRadius;
+            const area2 = Math.PI * other.radius * other.radius;
+            const newArea = area1 + area2;
+            this.targetRadius = Math.sqrt(newArea / Math.PI);
+        }
+    }
+
+    // 玩家类
+    class Player extends Entity {
+        constructor(x, y, radius, color, name) {
+            super(x, y, radius, color, name);
+            this.cells = [this]; // 分身列表
+            this.canSplit = true; // 是否可以分身
+            this.recombineTime = 0; // 重组时间
+            this.speedMultiplier = 1; // 速度倍率，用于加速功能
+        }
+
+        update() {
+            // 初始化所有分身的变形数据（如果不存在）
+            this.cells.forEach(cell => {
+                if (!cell.targetDeformation) {
+                    cell.targetDeformation = new Array(36).fill(1);
+                }
+                if (!cell.deformation) {
+                    cell.deformation = new Array(36).fill(1);
+                }
+                if (!cell.deformationVelocity) {
+                    cell.deformationVelocity = new Array(36).fill(0);
+                }
+                // 初始化墙壁碰撞标记（如果不存在）
+                if (!cell.wallCollisionDeformation) {
+                    cell.wallCollisionDeformation = new Array(36).fill(false);
+                }
+            });
+
+            // 重置目标变形数据（为分身碰撞做准备）
+            this.cells.forEach(cell => {
+                // 只重置非墙壁碰撞控制的点
+                for (let i = 0; i < cell.targetDeformation.length; i++) {
+                    if (!cell.wallCollisionDeformation[i]) {
+                        cell.targetDeformation[i] = 1;
+                    }
+                }
+            });
+
+            // 更新所有分身
+            this.cells.forEach(cell => {
+                // 将鼠标屏幕坐标转换为世界坐标，考虑缩放比例
+                const scale = camera.scale || 1;
+                cell.targetX = mouse.x / scale + camera.x;
+                cell.targetY = mouse.y / scale + camera.y;
+
+                // 计算移动速度 (越大移动越慢)
+                let speed = 250 / cell.targetRadius;
+                if (speed > 12) speed = 12;
+                if (speed < 2) speed = 2;
+
+                // 应用速度倍率
+                speed *= this.speedMultiplier;
+
+                // 检查是否是新分身，如果是，则应用弹射速度
+                if (cell.splitTime && Date.now() - cell.splitTime < 500) {
+                    // 在分身后的500毫秒内应用弹射速度
+                    cell.x += cell.velocityX;
+                    cell.y += cell.velocityY;
+
+                    // 弹射速度逐渐衰减
+                    cell.velocityX *= 0.95;
+                    cell.velocityY *= 0.95;
+                } else {
+                    // 缓动移动
+                    let dx = cell.targetX - cell.x;
+                    let dy = cell.targetY - cell.y;
+                    let dist = Math.hypot(dx, dy);
+
+                    if (dist > speed) {
+                        cell.x += (dx / dist) * speed;
+                        cell.y += (dy / dist) * speed;
+                    }
+                }
+            });
+
+            // 处理分身之间的碰撞，防止重叠
+            this.handleCellCollisions();
+
+            // 边界检测和墙壁碰撞变形（在分身碰撞之后应用）
+            this.cells.forEach(cell => {
+                // 检查左边界
+                if (cell.x < cell.radius) {
+                    // 先计算变形强度（增加变形幅度）
+                    const deformStrength = Math.min((cell.radius - cell.x) / cell.radius, 0.5);
+                    // 计算变形角度（指向右方）
+                    const wallAngle = 0;
+                    // 应用变形
+                    this.applyWallDeformation(cell, wallAngle, deformStrength);
+                    // 修正位置
+                    cell.x = cell.radius;
+                } else {
+                    // 如果离开左边界，清除左边的墙壁碰撞标记
+                    if (cell.x > cell.radius + 10) {
+                        for (let k = 0; k < cell.wallCollisionDeformation.length; k++) {
+                            const pointAngle = (k / cell.wallCollisionDeformation.length) * Math.PI * 2;
+                            // 检查是否在左边（角度接近0或2π）
+                            if (pointAngle < Math.PI / 4 || pointAngle > Math.PI * 7 / 4) {
+                                cell.wallCollisionDeformation[k] = false;
+                            }
+                        }
+                    }
+                }
+                // 检查右边界
+                if (cell.x > WORLD_SIZE - cell.radius) {
+                    // 先计算变形强度（增加变形幅度）
+                    const deformStrength = Math.min((cell.x - (WORLD_SIZE - cell.radius)) / cell.radius, 0.5);
+                    // 计算变形角度（指向左方）
+                    const wallAngle = Math.PI;
+                    // 应用变形
+                    this.applyWallDeformation(cell, wallAngle, deformStrength);
+                    // 修正位置
+                    cell.x = WORLD_SIZE - cell.radius;
+                } else {
+                    // 如果离开右边界，清除右边的墙壁碰撞标记
+                    if (cell.x < WORLD_SIZE - cell.radius - 10) {
+                        for (let k = 0; k < cell.wallCollisionDeformation.length; k++) {
+                            const pointAngle = (k / cell.wallCollisionDeformation.length) * Math.PI * 2;
+                            // 检查是否在右边（角度接近π）
+                            if (pointAngle > Math.PI * 3 / 4 && pointAngle < Math.PI * 5 / 4) {
+                                cell.wallCollisionDeformation[k] = false;
+                            }
+                        }
+                    }
+                }
+                // 检查上边界
+                if (cell.y < cell.radius) {
+                    // 先计算变形强度（增加变形幅度）
+                    const deformStrength = Math.min((cell.radius - cell.y) / cell.radius, 0.5);
+                    // 计算变形角度（指向下方）
+                    const wallAngle = Math.PI / 2;
+                    // 应用变形
+                    this.applyWallDeformation(cell, wallAngle, deformStrength);
+                    // 修正位置
+                    cell.y = cell.radius;
+                } else {
+                    // 如果离开上边界，清除上边的墙壁碰撞标记
+                    if (cell.y > cell.radius + 10) {
+                        for (let k = 0; k < cell.wallCollisionDeformation.length; k++) {
+                            const pointAngle = (k / cell.wallCollisionDeformation.length) * Math.PI * 2;
+                            // 检查是否在上边（角度接近π/2）
+                            if (pointAngle > Math.PI / 4 && pointAngle < Math.PI * 3 / 4) {
+                                cell.wallCollisionDeformation[k] = false;
+                            }
+                        }
+                    }
+                }
+                // 检查下边界
+                if (cell.y > WORLD_SIZE - cell.radius) {
+                    // 先计算变形强度（增加变形幅度）
+                    const deformStrength = Math.min((cell.y - (WORLD_SIZE - cell.radius)) / cell.radius, 0.5);
+                    // 计算变形角度（指向上方）
+                    const wallAngle = -Math.PI / 2;
+                    // 应用变形
+                    this.applyWallDeformation(cell, wallAngle, deformStrength);
+                    // 修正位置
+                    cell.y = WORLD_SIZE - cell.radius;
+                } else {
+                    // 如果离开下边界，清除下边的墙壁碰撞标记
+                    if (cell.y < WORLD_SIZE - cell.radius - 10) {
+                        for (let k = 0; k < cell.wallCollisionDeformation.length; k++) {
+                            const pointAngle = (k / cell.wallCollisionDeformation.length) * Math.PI * 2;
+                            // 检查是否在下边（角度接近-π/2或3π/2）
+                            if (pointAngle > Math.PI * 5 / 4 || pointAngle < Math.PI / 4) {
+                                cell.wallCollisionDeformation[k] = false;
+                            }
+                        }
+                    }
+                }
+            });
+
+            // 应用移动方向的变形（类似Agar.io的效果）
+            this.cells.forEach(cell => {
+                cell.applyMovementDeformation();
+            });
+
+            // 更新所有分身的弹性变形
+            this.cells.forEach(cell => {
+                cell.updateDeformation();
+            });
+
+            // 限制玩家最大直径不超过场地边长
+            this.limitPlayerSize();
+
+            // 应用正方形变形（当玩家足够大时）
+            this.applySquareDeformation();
+
+            // 如果可以重组，添加分身之间的吸引力
+            if (this.cells.length > 1 && Date.now() > this.recombineTime) {
+                this.applyCellAttraction();
+                this.tryRecombine();
+            }
+        }
+
+        // 尝试重组分身
+        tryRecombine() {
+            if (this.cells.length <= 1) return;
+
+            // 逐个检查并合并分身
+            const tolerance = 20; // 容差值，允许分身之间有20像素的间隙
+            let merged = true;
+
+            while (merged && this.cells.length > 1) {
+                merged = false;
+
+                // 从第二个分身开始，检查是否可以与主分身合并
+                for (let i = 1; i < this.cells.length; i++) {
+                    let dist = Math.hypot(this.cells[0].x - this.cells[i].x, this.cells[0].y - this.cells[i].y);
+
+                    // 如果距离足够近，则合并
+                    if (dist <= this.cells[0].radius + this.cells[i].radius + tolerance) {
+                        // 计算合并后的面积
+                        let area1 = Math.PI * this.cells[0].targetRadius * this.cells[0].targetRadius;
+                        let area2 = Math.PI * this.cells[i].targetRadius * this.cells[i].targetRadius;
+                        let newArea = area1 + area2;
+
+                        // 创建合并动画效果
+                        if (!this.mergeAnimations) {
+                            this.mergeAnimations = [];
+                        }
+
+                        // 添加合并动画，记录起始位置和目标位置
+                        this.mergeAnimations.push({
+                            startX: this.cells[i].x,
+                            startY: this.cells[i].y,
+                            targetX: this.cells[0].x,
+                            targetY: this.cells[0].y,
+                            radius: this.cells[i].targetRadius,
+                            color: this.cells[i].color,
+                            startTime: Date.now(),
+                            duration: 800 // 动画持续800毫秒，使合球更明显
+                        });
+
+                        // 更新主分身的半径
+                        this.cells[0].targetRadius = Math.sqrt(newArea / Math.PI);
+
+                        // 移除被合并的分身
+                        this.cells.splice(i, 1);
+
+                        merged = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        // 限制玩家最大直径不超过场地边长
+        limitPlayerSize() {
+            // 计算玩家的总面积
+            let totalArea = 0;
+            for (let cell of this.cells) {
+                totalArea += Math.PI * cell.targetRadius * cell.targetRadius;
+            }
+
+            // 计算玩家直径与场地边长的比例
+            const playerDiameter = 2 * Math.sqrt(totalArea / Math.PI);
+            const ratio = playerDiameter / WORLD_SIZE;
+
+            // 如果比例超过1，需要缩小
+            if (ratio > 1) {
+                // 计算需要缩小的比例
+                const scaleRatio = 1 / ratio;
+
+                // 缩小所有分身的半径
+                for (let cell of this.cells) {
+                    cell.radius *= scaleRatio;
+                    cell.targetRadius *= scaleRatio;
+                }
+            }
+        }
+
+        // 计算正方形变形（当玩家足够大时）
+        applySquareDeformation() {
+            // 计算玩家的总面积
+            let totalArea = 0;
+            for (let cell of this.cells) {
+                totalArea += Math.PI * cell.radius * cell.radius;
+            }
+
+            // 计算玩家直径与场地边长的比例
+            const playerDiameter = 2 * Math.sqrt(totalArea / Math.PI);
+            const ratio = playerDiameter / WORLD_SIZE;
+
+            // 当比例超过0.8时，开始应用正方形变形
+            if (ratio < 0.8) return;
+
+            // 计算变形强度（0到1，1表示完全正方形）
+            const squareStrength = Math.min((ratio - 0.8) / 0.2, 1);
+
+            // 对所有分身应用正方形变形
+            for (let cell of this.cells) {
+                // 计算分身在场地中的相对位置（0到1）
+                const relX = cell.x / WORLD_SIZE;
+                const relY = cell.y / WORLD_SIZE;
+
+                // 计算到最近墙壁的距离（归一化）
+                const distToLeft = relX;
+                const distToRight = 1 - relX;
+                const distToTop = relY;
+                const distToBottom = 1 - relY;
+
+                // 计算每个点的变形
+                for (let k = 0; k < cell.deformation.length; k++) {
+                    const pointAngle = (k / cell.deformation.length) * Math.PI * 2;
+                    const dirX = Math.cos(pointAngle);
+                    const dirY = Math.sin(pointAngle);
+
+                    // 计算该点在不同方向的变形因子
+                    let deformFactor = 1;
+
+                    // 水平方向：根据到左右墙壁的距离调整
+                    if (dirX > 0) {
+                        // 向右
+                        deformFactor = Math.min(deformFactor, 1 + (distToRight - 0.5) * squareStrength);
+                    } else {
+                        // 向左
+                        deformFactor = Math.min(deformFactor, 1 + (distToLeft - 0.5) * squareStrength);
+                    }
+
+                    // 垂直方向：根据到上下墙壁的距离调整
+                    if (dirY > 0) {
+                        // 向下
+                        deformFactor = Math.min(deformFactor, 1 + (distToBottom - 0.5) * squareStrength);
+                    } else {
+                        // 向上
+                        deformFactor = Math.min(deformFactor, 1 + (distToTop - 0.5) * squareStrength);
+                    }
+
+                    // 应用变形
+                    cell.deformation[k] = deformFactor;
+                    cell.targetDeformation[k] = deformFactor;
+                    cell.wallCollisionDeformation[k] = true;
+                    cell.deformationVelocity[k] = 0;
+                }
+            }
+        }
+
+        // 应用墙壁碰撞变形
+        applyWallDeformation(cell, wallAngle, deformStrength) {
+            // 确保cell有targetDeformation属性
+            if (!cell.targetDeformation) {
+                cell.targetDeformation = new Array(36).fill(1);
+            }
+            if (!cell.deformation) {
+                cell.deformation = new Array(36).fill(1);
+            }
+            if (!cell.wallCollisionDeformation) {
+                cell.wallCollisionDeformation = new Array(36).fill(false);
+            }
+            if (!cell.deformationVelocity) {
+                cell.deformationVelocity = new Array(36).fill(0);
+            }
+
+            // 计算相对于墙壁方向的变形
+            for (let k = 0; k < cell.targetDeformation.length; k++) {
+                const pointAngle = (k / cell.targetDeformation.length) * Math.PI * 2;
+                // 计算角度差，考虑周期性
+                let angleDiff = Math.abs(pointAngle - wallAngle);
+                if (angleDiff > Math.PI) {
+                    angleDiff = Math.PI * 2 - angleDiff;
+                }
+
+                // 使用余弦函数创建平滑的变形曲线
+                // 在墙壁方向（角度差为0）变形最大，在垂直方向（角度差为π/2）变形最小
+                const deformFactor = Math.cos(angleDiff * 2);
+
+                // 在墙壁方向压缩，不拉伸，确保小球与墙壁之间没有缝隙
+                const targetValue = 1 - deformFactor * deformStrength;
+
+                // 更新目标变形（取最小值，因为多个墙壁碰撞可能同时发生）
+                cell.targetDeformation[k] = Math.min(cell.targetDeformation[k], targetValue);
+
+                // 直接设置当前变形，而不是目标变形，使变形立即生效并保持
+                cell.deformation[k] = Math.min(cell.deformation[k], targetValue);
+
+                // 标记该点是由墙壁碰撞控制的
+                cell.wallCollisionDeformation[k] = true;
+
+                // 重置该点的变形速度，防止变形立即恢复
+                cell.deformationVelocity[k] = 0;
+            }
+        }
+
+        // 处理分身之间的碰撞，防止重叠
+        handleCellCollisions() {
+            // 初始化所有分身的目标变形数据（如果不存在）
+            for (let cell of this.cells) {
+                if (!cell.targetDeformation) {
+                    cell.targetDeformation = new Array(36).fill(1);
+                }
+            }
+
+            for (let i = 0; i < this.cells.length; i++) {
+                for (let j = i + 1; j < this.cells.length; j++) {
+                    let cell1 = this.cells[i];
+                    let cell2 = this.cells[j];
+
+                    // 计算两个分身之间的距离
+                    let dx = cell2.x - cell1.x;
+                    let dy = cell2.y - cell1.y;
+                    let dist = Math.hypot(dx, dy);
+
+                    // 计算最小距离（两个半径之和）
+                    let minDist = cell1.targetRadius + cell2.targetRadius;
+
+                    // 如果两个分身重叠，则将它们推开
+                    if (dist < minDist && dist > 0) {
+                        // 计算重叠量
+                        let overlap = minDist - dist;
+
+                        // 计算推开的距离（两个分身各推开一半）
+                        let pushDist = overlap / 2;
+
+                        // 计算推开的方向
+                        let pushX = (dx / dist) * pushDist;
+                        let pushY = (dy / dist) * pushDist;
+
+                        // 推开两个分身
+                        cell1.x -= pushX;
+                        cell1.y -= pushY;
+                        cell2.x += pushX;
+                        cell2.y += pushY;
+
+                        // 确保分身不会超出边界
+                        cell1.x = Math.max(cell1.radius, Math.min(WORLD_SIZE - cell1.radius, cell1.x));
+                        cell1.y = Math.max(cell1.radius, Math.min(WORLD_SIZE - cell1.radius, cell1.y));
+                        cell2.x = Math.max(cell2.radius, Math.min(WORLD_SIZE - cell2.radius, cell2.x));
+                        cell2.y = Math.max(cell2.radius, Math.min(WORLD_SIZE - cell2.radius, cell2.y));
+
+                        // 计算挤压变形
+                        // 计算两个分身之间的角度
+                        const angle = Math.atan2(dy, dx);
+
+                        // 计算变形强度（重叠越多，变形越明显）
+                        // 减小变形幅度，使效果更自然
+                        const deformStrength = Math.min(overlap / (minDist * 0.5), 0.25);
+
+                        // 对两个分身应用变形
+                        for (let cell of [cell1, cell2]) {
+                            // 计算相对于碰撞方向的变形
+                            for (let k = 0; k < cell.targetDeformation.length; k++) {
+                                // 跳过由墙壁碰撞控制的点
+                                if (cell.wallCollisionDeformation[k]) {
+                                    continue;
+                                }
+
+                                const pointAngle = (k / cell.targetDeformation.length) * Math.PI * 2;
+                                // 计算角度差，考虑周期性
+                                let angleDiff = Math.abs(pointAngle - angle);
+                                if (angleDiff > Math.PI) {
+                                    angleDiff = Math.PI * 2 - angleDiff;
+                                }
+
+                                // 使用余弦函数创建平滑的变形曲线
+                                // 在碰撞方向（角度差为0）变形最大，在垂直方向（角度差为π/2）变形最小
+                                const deformFactor = Math.cos(angleDiff * 2);
+
+                                // 在碰撞方向压缩，在垂直方向拉伸
+                                // 只压缩，不拉伸，确保分身之间不会产生空隙
+                                const targetValue = 1 - deformFactor * deformStrength;
+
+                                // 更新目标变形（取最大值，因为多个碰撞可能同时发生）
+                                cell.targetDeformation[k] = Math.min(cell.targetDeformation[k], targetValue);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // 应用分身之间的吸引力，使它们更快地靠近
+        applyCellAttraction() {
+            // 计算玩家的平均半径
+            let totalRadius = 0;
+            for (let cell of this.cells) {
+                totalRadius += cell.targetRadius;
+            }
+            const avgRadius = totalRadius / this.cells.length;
+
+            // 根据平均半径计算吸引力强度和最大移动距离
+            // 半径越大，吸引力越强，移动距离越大
+            // 如果开启闪合模式，吸引力更强
+            const baseStrength = isFlashRecombine ? 2.0 : 0.5;
+            const baseMaxDist = isFlashRecombine ? 15 : 5;
+            const radiusFactor = Math.max(1, avgRadius / 50); // 半径50为基准
+
+            const attractionStrength = baseStrength * radiusFactor;
+            const maxAttractDist = baseMaxDist * radiusFactor;
+
+            for (let i = 0; i < this.cells.length; i++) {
+                for (let j = i + 1; j < this.cells.length; j++) {
+                    let cell1 = this.cells[i];
+                    let cell2 = this.cells[j];
+
+                    // 计算两个分身之间的距离
+                    let dx = cell2.x - cell1.x;
+                    let dy = cell2.y - cell1.y;
+                    let dist = Math.hypot(dx, dy);
+
+                    // 计算最小距离（两个半径之和）
+                    let minDist = cell1.targetRadius + cell2.targetRadius;
+
+                    // 如果两个分身没有重叠，则施加吸引力
+                    if (dist > minDist && dist > 0) {
+                        // 计算吸引距离
+                        let attractDist = Math.min(dist - minDist, maxAttractDist);
+
+                        // 计算吸引的方向
+                        let attractX = (dx / dist) * attractDist * attractionStrength;
+                        let attractY = (dy / dist) * attractDist * attractionStrength;
+
+                        // 吸引两个分身
+                        cell1.x += attractX;
+                        cell1.y += attractY;
+                        cell2.x -= attractX;
+                        cell2.y -= attractY;
+
+                        // 确保分身不会超出边界
+                        cell1.x = Math.max(cell1.radius, Math.min(WORLD_SIZE - cell1.radius, cell1.x));
+                        cell1.y = Math.max(cell1.radius, Math.min(WORLD_SIZE - cell1.radius, cell1.y));
+                        cell2.x = Math.max(cell2.radius, Math.min(WORLD_SIZE - cell2.radius, cell2.x));
+                        cell2.y = Math.max(cell2.radius, Math.min(WORLD_SIZE - cell2.radius, cell2.y));
+                    }
+                }
+            }
+        }
+
+        // 分身功能
+        split() {
+            if (this.cells.length >= MAX_CELLS) return;
+
+            let newCells = [];
+            this.cells.forEach(cell => {
+                if (this.cells.length + newCells.length >= MAX_CELLS) return;
+
+                // 检查是否足够大可以分身
+                if (cell.targetRadius < 15) return;
+
+                // 计算分身方向
+                let dx = cell.targetX - cell.x;
+                let dy = cell.targetY - cell.y;
+                let dist = Math.hypot(dx, dy);
+                if (dist === 0) {
+                    dx = 1;
+                    dy = 0;
+                    dist = 1;
+                }
+
+                // 创建新分身
+                let newRadius = cell.targetRadius / Math.sqrt(2);
+                cell.targetRadius = newRadius;
+
+                // 计算新分身的位置，确保与原分身不重叠
+                let separationDistance = newRadius * 2 + 5; // 两个分身半径之和加上额外5像素的间距
+                let newCell = new Entity(
+                    cell.x + (dx / dist) * separationDistance,
+                    cell.y + (dy / dist) * separationDistance,
+                    newRadius,
+                    cell.color,
+                    cell.name
+                );
+                newCell.targetRadius = newRadius;
+
+                // 为新分身添加弹射速度
+                const boostSpeed = 20; // 弹射速度，增加到20使弹射更明显
+                newCell.velocityX = (dx / dist) * boostSpeed;
+                newCell.velocityY = (dy / dist) * boostSpeed;
+                newCell.splitTime = Date.now(); // 记录分身时间
+
+                newCells.push(newCell);
+            });
+
+            this.cells = this.cells.concat(newCells);
+            this.recombineTime = Date.now() + 3000; // 3秒后可以重组
+        }
+
+        // 吐孢子功能
+        ejectSpore() {
+            this.cells.forEach(cell => {
+                // 检查是否足够大可以吐孢子
+                if (cell.targetRadius < 20) return;
+
+                // 计算吐孢子方向
+                let dx = cell.targetX - cell.x;
+                let dy = cell.targetY - cell.y;
+                let dist = Math.hypot(dx, dy);
+                if (dist === 0) {
+                    dx = 1;
+                    dy = 0;
+                    dist = 1;
+                }
+
+                // 创建孢子
+                let spore = new Spore(
+                    cell.x + (dx / dist) * (cell.radius + SPORE_RADIUS),
+                    cell.y + (dy / dist) * (cell.radius + SPORE_RADIUS),
+                    cell.color
+                );
+
+                // 设置孢子速度
+                spore.velocityX = (dx / dist) * 15;
+                spore.velocityY = (dy / dist) * 15;
+
+                spores.push(spore);
+
+                // 减少玩家大小，消耗500体积
+                let currentArea = Math.PI * cell.targetRadius * cell.targetRadius;
+                let newArea = currentArea - 500;
+
+                // 确保新面积不为负
+                if (newArea < 0) newArea = 0;
+
+                cell.targetRadius = Math.sqrt(newArea / Math.PI);
+
+                // 立即更新当前半径，使效果更明显
+                cell.radius = cell.targetRadius;
+            });
+        }
+
+        draw(ctx) {
+            // 绘制所有分身
+            this.cells.forEach(cell => {
+                // 调用Entity的draw方法，支持变形效果
+                Entity.prototype.draw.call(cell, ctx);
+            });
+
+            // 绘制合并动画
+            if (this.mergeAnimations && this.mergeAnimations.length > 0) {
+                this.mergeAnimations = this.mergeAnimations.filter(anim => {
+                    const elapsed = Date.now() - anim.startTime;
+                    const progress = Math.min(elapsed / anim.duration, 1);
+
+                    if (progress < 1) {
+                        // 使用缓动函数使动画更自然
+                        const easeProgress = 1 - Math.pow(1 - progress, 3); // 三次缓出
+
+                        // 计算当前位置（从起始位置移动到目标位置）
+                        const currentX = anim.startX + (anim.targetX - anim.startX) * easeProgress;
+                        const currentY = anim.startY + (anim.targetY - anim.startY) * easeProgress;
+
+                        // 计算当前半径（逐渐缩小）
+                        const currentRadius = anim.radius * (1 - easeProgress);
+
+                        // 绘制合并动画
+                        ctx.beginPath();
+                        ctx.arc(currentX, currentY, currentRadius, 0, Math.PI * 2);
+                        ctx.fillStyle = anim.color;
+                        ctx.globalAlpha = 1 - easeProgress; // 逐渐透明
+                        ctx.fill();
+                        ctx.globalAlpha = 1; // 恢复透明度
+
+                        return true; // 保留动画
+                    } else {
+                        return false; // 移除完成的动画
+                    }
+                });
+            }
+        }
+
+        // 获取主分身的位置（用于摄像机跟随）
+        getMainPosition() {
+            return {
+                x: this.cells[0].x,
+                y: this.cells[0].y
+            };
+        }
+
+        // 获取主分身的半径
+        getMainRadius() {
+            return this.cells[0].targetRadius;
+        }
+
+        // 获取玩家的总体积（所有分身的体积之和）
+        getTotalVolume() {
+            let totalArea = 0;
+            this.cells.forEach(cell => {
+                totalArea += Math.PI * cell.targetRadius * cell.targetRadius;
+            });
+            // 返回等效半径（即所有分身合并为一个球时的半径）
+            return Math.sqrt(totalArea / Math.PI);
+        }
+    }
+
+    // AI机器人类
+    class Bot extends Entity {
+        constructor(x, y, radius, color, name) {
+            super(x, y, radius, color, name);
+            this.changeTargetTime = 0;
+            this.velocityX = 0;
+            this.velocityY = 0;
+            this.directionChangeTimer = 0;
+        }
+
+        update() {
+            // 计算移动速度
+            let speed = 250 / this.targetRadius;
+            if (speed > 12) speed = 12;
+            if (speed < 2) speed = 2;
+
+            // 平滑改变方向
+            if (Date.now() > this.directionChangeTimer) {
+                // 生成新的随机方向
+                const angle = Math.random() * Math.PI * 2;
+                this.velocityX = Math.cos(angle) * speed;
+                this.velocityY = Math.sin(angle) * speed;
+                this.directionChangeTimer = Date.now() + Math.random() * 3000 + 2000;
+            }
+
+            // 应用速度
+            this.x += this.velocityX;
+            this.y += this.velocityY;
+
+            // 边界检测
+            this.x = Math.max(this.radius, Math.min(WORLD_SIZE - this.radius, this.x));
+            this.y = Math.max(this.radius, Math.min(WORLD_SIZE - this.radius, this.y));
+
+            // 如果碰到边界，立即改变方向
+            if (this.x <= this.radius || this.x >= WORLD_SIZE - this.radius) {
+                this.velocityX *= -1;
+                this.directionChangeTimer = Date.now() + Math.random() * 2000 + 1000;
+            }
+            if (this.y <= this.radius || this.y >= WORLD_SIZE - this.radius) {
+                this.velocityY *= -1;
+                this.directionChangeTimer = Date.now() + Math.random() * 2000 + 1000;
+            }
+        }
+    }
+
+    // 随机生成实体
+    function spawnFood(count) {
+        for (let i = 0; i < count; i++) {
+            let r = Math.random() * 3 + 3; // 半径 3-6
+            let x = Math.random() * (WORLD_SIZE - r * 2) + r;
+            let y = Math.random() * (WORLD_SIZE - r * 2) + r;
+            let c = colors[Math.floor(Math.random() * colors.length)];
+            foods.push(new Entity(x, y, r, c, ''));
+        }
+    }
+
+    function spawnBots(count) {
+        const botNames = ['Alpha', 'Beta', 'Gamma', 'Delta', 'Sigma', 'Zeus', 'Apollo', 'Ares'];
+        for (let i = 0; i < count; i++) {
+            let r = INIT_PLAYER_RADIUS + (Math.random() * 30 - 10); // 有的比玩家大，有的比玩家小
+            let x = Math.random() * (WORLD_SIZE - r * 2) + r;
+            let y = Math.random() * (WORLD_SIZE - r * 2) + r;
+            let c = colors[Math.floor(Math.random() * colors.length)];
+            let name = botNames[Math.floor(Math.random() * botNames.length)];
+            bots.push(new Bot(x, y, r, c, name));
+        }
+    }
+
+    // 生成刺刺球
+    function spawnSpikes(count) {
+        for (let i = 0; i < count; i++) {
+            let r = SPIKE_RADIUS;
+            let x = Math.random() * (WORLD_SIZE - r * 2) + r;
+            let y = Math.random() * (WORLD_SIZE - r * 2) + r;
+            spikes.push(new Spike(x, y, r));
+        }
+    }
+
+    // 碰撞检测核心逻辑
+    function checkCollisions() {
+        // 检查游戏是否已经结束
+        if (isGameOver) return;
+
+        let allPlayers = [player, ...bots];
+
+        for (let i = 0; i < allPlayers.length; i++) {
+            let p1 = allPlayers[i];
+            if (!p1) continue;
+
+            // 获取p1的所有分身
+            let p1Cells = p1.cells || [p1];
+
+            // 添加标记，防止同一帧内该玩家碰到多个刺刺球
+            let playerHitSpike = false;
+
+            // 1. 吃食物
+            for (let j = foods.length - 1; j >= 0; j--) {
+                let f = foods[j];
+                for (let cell of p1Cells) {
+                    let dist = Math.hypot(cell.x - f.x, cell.y - f.y);
+                    if (dist < cell.radius) {
+                        cell.eat(f);
+                        foods.splice(j, 1);
+                        spawnFood(1); // 吃一个补一个
+                        break;
+                    }
+                }
+            }
+
+            // 2. 吃孢子
+            for (let j = spores.length - 1; j >= 0; j--) {
+                let spore = spores[j];
+                for (let cell of p1Cells) {
+                    let dist = Math.hypot(cell.x - spore.x, cell.y - spore.y);
+                    if (dist < cell.radius) {
+                        // 吃孢子增加500体积
+                        let currentArea = Math.PI * cell.targetRadius * cell.targetRadius;
+                        let newArea = currentArea + 500;
+                        cell.targetRadius = Math.sqrt(newArea / Math.PI);
+
+                        // 立即更新当前半径，使效果更明显
+                        cell.radius = cell.targetRadius;
+
+                        spores.splice(j, 1);
+                        break;
+                    }
+                }
+            }
+
+            // 3. 碰到刺刺球
+            for (let j = spikes.length - 1; j >= 0 && !playerHitSpike; j--) {
+                let spike = spikes[j];
+                // 添加标记，防止同一刺刺球在同一帧内被多次处理
+                let spikeProcessed = false;
+                for (let cell of p1Cells) {
+                    if (spikeProcessed) break;
+                    let dist = Math.hypot(cell.x - spike.x, cell.y - spike.y);
+                    // 如果玩家比刺刺球大，会被刺破
+                    // 降低触发条件：只需要玩家比刺刺球大一点点，并且接触到刺刺球
+                    if (dist < cell.radius + spike.radius * 0.8 && cell.radius > spike.radius * 1.05) {
+                        // 检查这个刺刺球是否已经被处理过
+                        if (spike.processed) {
+                            break;
+                        }
+                        spikeProcessed = true;
+                        spike.processed = true; // 标记这个刺刺球已经被处理过
+                        playerHitSpike = true;
+
+                        // 检查是否是Bot（没有分身）
+                        let isBot = !p1.cells;
+
+                        // 【修复1】计算扎刺球的面积：必须使用 targetRadius！
+                        // 防止在吃球变大的动画过渡期间扎刺，丢失还没“长出来”的体积
+                        let cellArea = Math.PI * cell.targetRadius * cell.targetRadius;
+
+                        // 检查是否需要分裂
+                        // 【修复2】将 isBot 移出分裂逻辑，让 Bot 直接加体积，防止蒸发
+                        if (!isBot && p1.cells.length <= 2) {
+                            // 玩家分身数小于等于2，分裂成8个分身
+                            // 分裂后的面积：扎刺球的面积加上300 * 8（每个分身增加300面积）
+                            let newCellArea = cellArea + 300 * 8;
+                            let newRadius = Math.sqrt(newCellArea / (Math.PI * 8)); // 每个分身的新半径
+
+                            // 玩家有多个分身，更新扎刺球的半径
+                            cell.targetRadius = newRadius;
+                            cell.radius = newRadius; // 扎破后可以立刻视觉同步
+
+                            // 创建7个新分身（总共8个）
+                            // 计算分裂方向（从刺刺球中心指向分身中心）
+                            let dx = cell.x - spike.x;
+                            let dy = cell.y - spike.y;
+                            if (dx === 0 && dy === 0) {
+                                dx = 1;
+                                dy = 0;
+                            }
+
+                            // 创建7个新分身
+                            for (let i = 0; i < 7 && p1.cells.length < MAX_CELLS; i++) {
+                                // 计算每个分身的方向，均匀分布
+                                let angle = (i / 7) * Math.PI * 2;
+                                let dirX = Math.cos(angle);
+                                let dirY = Math.sin(angle);
+
+                                // 创建新分身
+                                let newCell = new Entity(
+                                    cell.x + dirX * newRadius * 2,
+                                    cell.y + dirY * newRadius * 2,
+                                    newRadius,
+                                    cell.color,
+                                    cell.name
+                                );
+                                newCell.targetRadius = newRadius; // 设置目标半径，用于平滑过渡
+
+                                // 为新分身添加弹射速度
+                                const boostSpeed = 15;
+                                newCell.velocityX = dirX * boostSpeed;
+                                newCell.velocityY = dirY * boostSpeed;
+                                newCell.splitTime = Date.now();
+
+                                p1.cells.push(newCell);
+                            }
+
+                            // 设置重组时间，防止立即合体
+                            // 如果开启闪合模式，使用1秒重组时间，否则使用3秒
+                            let recombineDelay = isFlashRecombine ? 1000 : 3000;
+                            p1.recombineTime = Date.now() + recombineDelay;
+                            
+                        } else {
+                            // Bot 或 玩家分身数大于2，不再分裂，直接增加体积
+                            // 增加5000面积
+                            let addedArea = 5000;
+                            let newCellArea = cellArea + addedArea;
+                            let newRadius = Math.sqrt(newCellArea / Math.PI);
+
+                            // 只更新扎刺球的半径
+                            cell.targetRadius = newRadius;
+                            cell.radius = newRadius;
+
+                            // 设置重组时间，防止立即合体（只有玩家有 cells，才需要重组）
+                            if (!isBot) {
+                                let recombineDelay = isFlashRecombine ? 1000 : 3000;
+                                p1.recombineTime = Date.now() + recombineDelay;
+                            }
+                        }
+
+                        // 移除被撞到的刺刺球
+                        spikes.splice(j, 1);
+                        // 生成新的刺刺球
+                        spawnSpikes(1);
+                        break;
+                    }
+                }
+            }
+
+            // 3. 互相吃 (大吃小，要求面积比对方大 10% 才能吃)
+            for (let j = i + 1; j < allPlayers.length; j++) {
+                let p2 = allPlayers[j];
+                if (!p1 || !p2) continue;
+
+                // 获取p2的所有分身
+                let p2Cells = p2.cells || [p2];
+
+                // 检查p1的分身与p2的分身之间的碰撞
+                for (let cell1 of p1Cells) {
+                    for (let cell2 of p2Cells) {
+                        let dist = Math.hypot(cell1.x - cell2.x, cell1.y - cell2.y);
+                
+                        // 判断谁吃谁
+                        if (dist < Math.max(cell1.radius, cell2.radius)) {
+                            // 计算被覆盖的面积比例
+                            let smallerRadius = Math.min(cell1.radius, cell2.radius);
+                            let largerRadius = Math.max(cell1.radius, cell2.radius);
+
+                    // 计算两个圆的交点距离
+                    let d = dist;
+                    let r1 = smallerRadius;
+                    let r2 = largerRadius;
+
+                    // 计算被覆盖的扇形角度
+                    let angle = 2 * Math.acos((r1 * r1 + d * d - r2 * r2) / (2 * r1 * d));
+
+                    // 计算被覆盖的面积
+                    let sectorArea = 0.5 * r1 * r1 * angle;
+                    let triangleArea = 0.5 * r1 * r1 * Math.sin(angle);
+                    let coveredArea = sectorArea - triangleArea;
+
+                    // 计算被覆盖面积占小球总面积的比例
+                    let totalArea = Math.PI * r1 * r1;
+                    let coveredRatio = coveredArea / totalArea;
+
+                            if (cell1.radius > cell2.radius * 1.05 && coveredRatio > 0.5) {
+                                // 如果p2是玩家且开启无敌模式，则不执行吃球逻辑
+                                if (p2 === player && isInvincible) {
+                                    continue;
+                                }
+                                cell1.eat(cell2);
+                                // 移除被吃掉的分身
+                                if (p2.cells) {
+                                    p2.cells = p2.cells.filter(c => c !== cell2);
+                                    // 如果p2没有分身了，则p2被吃掉
+                                    if (p2.cells.length === 0) {
+                                        if (p2 === player) {
+                                            // 在清空player.cells之前，保存最后一个分身的体积
+                                            const lastCellVolume = Math.PI * cell2.radius * cell2.radius;
+                                            // 临时保存到player对象上
+                                            player.finalVolume = Math.sqrt(lastCellVolume / Math.PI);
+                                            triggerGameOver();
+                                            return;
+                                        }
+                                        bots = bots.filter(b => b !== p2);
+                                        allPlayers[j] = null;
+                                        spawnBots(1);
+                                        // 检查游戏是否已经结束
+                                        if (isGameOver) return;
+                                    }
+                                } else {
+                                    if (p2 === player) {
+                                        // 在清空player之前，保存体积
+                                        const lastCellVolume = Math.PI * cell2.radius * cell2.radius;
+                                        player.finalVolume = Math.sqrt(lastCellVolume / Math.PI);
+                                        triggerGameOver();
+                                        return;
+                                    }
+                                    bots = bots.filter(b => b !== p2);
+                                    allPlayers[j] = null;
+                                    spawnBots(1);
+                                    // 检查游戏是否已经结束
+                                    if (isGameOver) return;
+                                }
+                            } else if (cell2.radius > cell1.radius * 1.05 && coveredRatio > 0.5) {
+                                // 如果p1是玩家且开启无敌模式，则不执行吃球逻辑
+                                if (p1 === player && isInvincible) {
+                                    continue;
+                                }
+                                cell2.eat(cell1);
+                                // 移除被吃掉的分身
+                                if (p1.cells) {
+                                    p1.cells = p1.cells.filter(c => c !== cell1);
+                                    // 如果p1没有分身了，则p1被吃掉
+                                    if (p1.cells.length === 0) {
+                                        if (p1 === player) {
+                                            // 在清空player.cells之前，保存最后一个分身的体积
+                                            const lastCellVolume = Math.PI * cell1.radius * cell1.radius;
+                                            // 临时保存到player对象上
+                                            player.finalVolume = Math.sqrt(lastCellVolume / Math.PI);
+                                            triggerGameOver();
+                                            return;
+                                        }
+                                        bots = bots.filter(b => b !== p1);
+                                        allPlayers[i] = null;
+                                        spawnBots(1);
+                                        // 检查游戏是否已经结束
+                                        if (isGameOver) return;
+                                        break;
+                                    }
+                                } else {
+                                    if (p1 === player) {
+                                        // 在清空player之前，保存体积
+                                        const lastCellVolume = Math.PI * cell1.radius * cell1.radius;
+                                        player.finalVolume = Math.sqrt(lastCellVolume / Math.PI);
+                                        triggerGameOver();
+                                        return;
+                                    }
+                                    bots = bots.filter(b => b !== p1);
+                                    allPlayers[i] = null;
+                                    spawnBots(1);
+                                    // 检查游戏是否已经结束
+                                    if (isGameOver) return;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    if (!allPlayers[i]) break; // p1 死了，跳出内层循环
+                }
+            }
+        }
+    }
+
+    // 更新排行榜
+    function updateLeaderboard() {
+        let allPlayers = [...bots];
+        if (player && player.cells && player.cells.length > 0) {
+            allPlayers.push(player);
+        }
+        // 按总体积从大到小排序
+        allPlayers.sort((a, b) => {
+            let volumeA = a.getTotalVolume ? a.getTotalVolume() : a.radius;
+            let volumeB = b.getTotalVolume ? b.getTotalVolume() : b.radius;
+            return volumeB - volumeA;
+        });
+        
+        leaderboardList.innerHTML = '';
+        for (let i = 0; i < Math.min(5, allPlayers.length); i++) {
+            let p = allPlayers[i];
+            let li = document.createElement('li');
+            li.style.color = p === player ? 'red' : 'black';
+            li.style.fontWeight = p === player ? 'bold' : 'normal';
+            let volume = p.getTotalVolume ? p.getTotalVolume() : p.radius;
+            li.innerText = `${p.name} - ${Math.floor(volume)}`;
+            leaderboardList.appendChild(li);
+        }
+    }
+
+    // 绘制背景网格 (增强运动感知)
+    function drawGrid() {
+        ctx.save();
+
+        // 绘制渐变背景
+        const gradient = ctx.createRadialGradient(
+            width / 2, height / 2, 0,
+            width / 2, height / 2, Math.max(width, height) / 2
+        );
+        gradient.addColorStop(0, '#e8f4f8');  // 中心浅蓝色
+        gradient.addColorStop(0.5, '#d4e8ed');  // 中间浅蓝灰色
+        gradient.addColorStop(1, '#b8d4e0');  // 边缘深一点的蓝灰色
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, width, height);
+
+        // 注释掉网格绘制
+        // ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+        // ctx.lineWidth = 1 / (camera.scale || 1);
+        // const gridSize = 50;
+
+        // // 应用镜头偏移和缩放，将玩家置于屏幕中心
+        // ctx.translate(width / 2, height / 2);
+        // ctx.scale(camera.scale || 1, camera.scale || 1);
+        // ctx.translate(-camera.x, -camera.y);
+
+        // const offsetX = -(camera.x % gridSize);
+        // const offsetY = -(camera.y % gridSize);
+
+        // ctx.beginPath();
+        // for (let x = offsetX; x < WORLD_SIZE; x += gridSize) {
+        //     ctx.moveTo(x, 0);
+        //     ctx.lineTo(x, WORLD_SIZE);
+        // }
+        // for (let y = offsetY; y < WORLD_SIZE; y += gridSize) {
+        //     ctx.moveTo(0, y);
+        //     ctx.lineTo(WORLD_SIZE, y);
+        // }
+        // ctx.stroke();
+        ctx.restore();
+    }
+
+    // 绘制地图边界
+    function drawBounds() {
+        ctx.save();
+        ctx.strokeStyle = 'red';
+        ctx.lineWidth = 5 / (camera.scale || 1);
+
+        // 应用镜头偏移和缩放，将玩家置于屏幕中心
+        ctx.translate(width / 2, height / 2);
+        ctx.scale(camera.scale || 1, camera.scale || 1);
+        ctx.translate(-camera.x, -camera.y);
+
+        ctx.strokeRect(0, 0, WORLD_SIZE, WORLD_SIZE);
+        ctx.restore();
+    }
+
+    // 绘制小地图
+    function drawMinimap() {
+        // 清空小地图
+        minimapCtx.clearRect(0, 0, minimapSize, minimapSize);
+
+        // 绘制背景
+        minimapCtx.fillStyle = '#f0f0f0';
+        minimapCtx.fillRect(0, 0, minimapSize, minimapSize);
+
+        // 计算缩放比例
+        const scale = minimapSize / WORLD_SIZE;
+
+        // 绘制Bot点
+        for (let bot of bots) {
+            const x = bot.x * scale;
+            const y = bot.y * scale;
+            minimapCtx.fillStyle = bot.color;
+            minimapCtx.beginPath();
+            minimapCtx.arc(x, y, Math.max(2, bot.radius * scale), 0, Math.PI * 2);
+            minimapCtx.fill();
+        }
+
+        // 绘制玩家点（用红色高亮显示）
+        if (player && player.cells && player.cells.length > 0) {
+            player.cells.forEach(cell => {
+                const playerX = cell.x * scale;
+                const playerY = cell.y * scale;
+                minimapCtx.fillStyle = '#FF0000';
+                minimapCtx.beginPath();
+                minimapCtx.arc(playerX, playerY, Math.max(3, cell.radius * scale), 0, Math.PI * 2);
+                minimapCtx.fill();
+
+                // 绘制玩家边框
+                minimapCtx.strokeStyle = '#000';
+                minimapCtx.lineWidth = 1;
+                minimapCtx.stroke();
+            });
+        }
+    }
+
+    // 游戏主循环
+    function gameLoop() {
+        if (isGameOver || isPaused) return;
+
+        // 平滑缩放：逐渐接近目标缩放比例
+        const zoomSmoothness = 0.1; // 缩放平滑度，值越小越平滑
+        camera.scale += (camera.targetScale - camera.scale) * zoomSmoothness;
+
+        // 清空画布
+        ctx.clearRect(0, 0, width, height);
+
+        // 检查玩家是否还存在
+        if (!player || !player.cells || player.cells.length === 0) {
+            triggerGameOver();
+            return;
+        }
+
+        // 再次检查游戏是否已经结束，避免在玩家被吃掉后继续执行
+        if (isGameOver) return;
+
+        // 更新玩家和Bot
+        player.update();
+        player.cells.forEach(cell => cell.updateRadius()); // 更新玩家分身半径动画
+        bots.forEach(b => {
+            b.update();
+            b.updateRadius(); // 更新Bot半径动画
+        });
+
+        // 更新孢子
+        spores.forEach(spore => spore.update());
+
+        // 孢子不会过期
+
+        // 更新刺刺球
+        spikes.forEach(spike => {
+            spike.processed = false; // 重置刺刺球的 processed 标志
+            spike.update();
+        });
+
+        // 计算镜头位置 (让玩家始终在屏幕中心)
+        const playerPos = player.getMainPosition();
+
+        // 确保玩家始终位于屏幕中心
+        camera.x = playerPos.x;
+        camera.y = playerPos.y;
+
+        // 碰撞检测
+        if (!isGameOver) {
+            checkCollisions();
+        }
+
+        // 开始绘制世界
+        drawGrid();
+        drawBounds();
+
+        ctx.save();
+        // 应用镜头偏移和缩放，将玩家置于屏幕中心
+        ctx.translate(width / 2, height / 2);
+        ctx.scale(camera.scale, camera.scale);
+        ctx.translate(-camera.x, -camera.y);
+
+        // 绘制食物
+        foods.forEach(f => f.draw(ctx));
+
+        // 绘制孢子
+        spores.forEach(spore => spore.draw(ctx));
+
+        // 绘制刺刺球
+        spikes.forEach(spike => spike.draw(ctx));
+        
+        // 绘制Bots和玩家 (先根据大小排序，让小球在大球上面，或者大球在上面，这里选择大球覆盖小球)
+        let renderQueue = [...bots];
+        if (player && player.cells && player.cells.length > 0) {
+            renderQueue.push(player);
+        }
+        renderQueue.sort((a, b) => {
+            let radiusA = a.getMainRadius ? a.getMainRadius() : a.radius;
+            let radiusB = b.getMainRadius ? b.getMainRadius() : b.radius;
+            return radiusA - radiusB;
+        });
+        renderQueue.forEach(entity => entity.draw(ctx));
+
+        ctx.restore();
+
+        // 绘制小地图
+        drawMinimap();
+
+        // 实时更新玩家体积显示
+        if (player && player.cells && player.cells.length > 0) {
+            const playerVolume = player.getTotalVolume ? player.getTotalVolume() : player.radius;
+            scoreBoard.innerText = `体积: ${Math.floor(playerVolume)}`;
+        }
+
+        // 更新排行榜（限流更新，防止卡顿）
+        if (frameCount % 30 === 0) {
+            updateLeaderboard();
+        }
+        frameCount++;
+
+        // 只在游戏未结束时请求下一帧
+        if (!isGameOver) {
+            animationId = requestAnimationFrame(gameLoop);
+        }
+    }
+
+    // 游戏结束
+    function triggerGameOver() {
+        // 防止多次调用
+        if (isGameOver) return;
+
+        // 无敌模式下不触发游戏结束
+        if (isInvincible) return;
+
+        // 获取玩家的最终体积
+        let finalVolume = 0;
+        if (player) {
+            // 如果有保存的finalVolume（被吃掉时保存的），则使用它
+            if (player.finalVolume) {
+                finalVolume = player.finalVolume;
+            } else if (player.cells && player.cells.length > 0) {
+                // 否则计算当前体积
+                finalVolume = player.getTotalVolume ? player.getTotalVolume() : 0;
+            }
+        }
+
+        isGameOver = true;
+        isPaused = false;
+        cancelAnimationFrame(animationId);
+        pauseScreen.style.display = 'none';
+
+        // 显示游戏结束界面
+        finalScoreEl.innerText = `体积: ${Math.floor(finalVolume)}`;
+        gameOverScreen.style.display = 'block';
+
+        // 清空画布，避免白屏
+        ctx.clearRect(0, 0, width, height);
+    }
+
+    // 初始化/重新开始游戏
+    // 作弊相关变量
+    let isInvincible = false;
+    let isFlashRecombine = false;
+
+    // 作弊菜单切换
+    document.getElementById('cheatBtn').addEventListener('click', function() {
+        const menu = document.getElementById('cheatMenu');
+        menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+    });
+
+    // 无敌模式切换
+    document.getElementById('invincibleToggle').addEventListener('change', function() {
+        isInvincible = this.checked;
+    });
+
+    // 闪合模式切换
+    document.getElementById('flashRecombineToggle').addEventListener('change', function() {
+        isFlashRecombine = this.checked;
+        if (player && player.cells) {
+            // 如果开启闪合，立即设置重组时间为1秒后
+            if (isFlashRecombine) {
+                player.recombineTime = Date.now() + 1000;
+            }
+        }
+    });
+
+    // 体积+10000
+    function cheatAdd100() {
+        if (!player) return;
+        let p1Cells = player.cells || [player];
+        for (let cell of p1Cells) {
+            let currentArea = Math.PI * cell.targetRadius * cell.targetRadius;
+            let newArea = currentArea + 10000;
+            cell.targetRadius = Math.sqrt(newArea / Math.PI);
+            cell.radius = cell.targetRadius;
+        }
+    }
+
+    // 体积翻倍
+    function cheatDouble() {
+        if (!player) return;
+        let p1Cells = player.cells || [player];
+        for (let cell of p1Cells) {
+            cell.targetRadius *= Math.sqrt(2);
+            cell.radius = cell.targetRadius;
+        }
+    }
+
+    // 体积-10000
+    function cheatSubtract100() {
+        if (!player) return;
+        let p1Cells = player.cells || [player];
+        for (let cell of p1Cells) {
+            let currentArea = Math.PI * cell.targetRadius * cell.targetRadius;
+            let initArea = Math.PI * INIT_PLAYER_RADIUS * INIT_PLAYER_RADIUS;
+            // 只有当前体积大于初始体积时才能减少
+            if (currentArea <= initArea) return;
+            let newArea = currentArea - 10000;
+            if (newArea < initArea) newArea = initArea; // 不能小于初始体积
+            cell.targetRadius = Math.sqrt(newArea / Math.PI);
+            cell.radius = cell.targetRadius;
+        }
+    }
+
+    // 体积减半
+    function cheatHalf() {
+        if (!player) return;
+        let p1Cells = player.cells || [player];
+        for (let cell of p1Cells) {
+            let currentArea = Math.PI * cell.targetRadius * cell.targetRadius;
+            let initArea = Math.PI * INIT_PLAYER_RADIUS * INIT_PLAYER_RADIUS;
+            // 只有当前体积大于初始体积时才能减半
+            if (currentArea <= initArea) return;
+            let newArea = currentArea / 2;
+            if (newArea < initArea) newArea = initArea; // 不能小于初始体积
+            cell.targetRadius = Math.sqrt(newArea / Math.PI);
+            cell.radius = cell.targetRadius;
+        }
+    }
+
+    // 验证吸铁石范围输入
+    function validateMagnetRange(input) {
+        let value = parseInt(input.value);
+        if (isNaN(value)) {
+            input.value = 1;
+        } else if (value < 1) {
+            input.value = 1;
+        } else if (value > 9999) {
+            input.value = 9999;
+        }
+    }
+
+    // 验证加速倍率输入
+    function validateSpeedMultiplier(input) {
+        let value = parseFloat(input.value);
+        if (isNaN(value)) {
+            input.value = 1;
+        } else if (value < 1) {
+            input.value = 1;
+        } else if (value > 10) {
+            input.value = 10;
+        }
+    }
+
+    // 加速功能
+    function cheatSpeed() {
+        if (!player) return;
+        const speedInput = document.getElementById('speedMultiplier');
+        let multiplier = parseFloat(speedInput.value) || 2;
+        // 限制倍率在1至10之间
+        multiplier = Math.max(1, Math.min(10, multiplier));
+
+        // 设置玩家的速度倍率
+        player.speedMultiplier = multiplier;
+    }
+
+    // 吸铁石功能
+    function cheatMagnet() {
+        if (!player) return;
+        const rangeInput = document.getElementById('magnetRange');
+        let range = parseInt(rangeInput.value) || 500;
+        // 限制范围在1至9999之间
+        range = Math.max(1, Math.min(9999, range));
+
+        // 获取玩家所有分身的位置
+        let p1Cells = player.cells || [player];
+        let playerPositions = p1Cells.map(cell => ({ x: cell.x, y: cell.y }));
+
+        // 遍历所有彩豆，将范围内的彩豆吃掉
+        for (let i = foods.length - 1; i >= 0; i--) {
+            const f = foods[i];
+
+            // 检查彩豆是否在任意玩家分身的范围内
+            let inRange = false;
+            for (let pos of playerPositions) {
+                const dist = Math.hypot(f.x - pos.x, f.y - pos.y);
+                if (dist <= range) {
+                    inRange = true;
+                    break;
+                }
+            }
+
+            if (inRange) {
+                // 找出范围内的所有分身
+                let inRangeCells = [];
+                for (let cell of p1Cells) {
+                    const dist = Math.hypot(f.x - cell.x, f.y - cell.y);
+                    if (dist <= range) {
+                        inRangeCells.push(cell);
+                    }
+                }
+
+                // 计算每个分身应该增加的体积（彩豆体积除以分身数量）
+                const foodArea = Math.PI * f.radius * f.radius;
+                const areaPerCell = foodArea / inRangeCells.length;
+
+                // 将彩豆的体积平均分配给范围内的分身
+                for (let cell of inRangeCells) {
+                    const currentArea = Math.PI * cell.targetRadius * cell.targetRadius;
+                    const newArea = currentArea + areaPerCell;
+                    cell.targetRadius = Math.sqrt(newArea / Math.PI);
+                }
+
+                // 移除被吃掉的彩豆
+                foods.splice(i, 1);
+                // 补充一个新的彩豆
+                spawnFood(1);
+            }
+        }
+    }
+
+    function restartGame() {
+        isGameOver = false;
+        isPaused = false;
+        gameOverScreen.style.display = 'none';
+        pauseScreen.style.display = 'none';
+        
+        foods = [];
+        bots = [];
+        spores = [];
+        spikes = [];
+        
+        // 生成玩家 (地图中央附近)
+        player = new Player(WORLD_SIZE/2, WORLD_SIZE/2, INIT_PLAYER_RADIUS, '#FF3333', '你');
+        
+        spawnFood(FOOD_COUNT);
+        spawnBots(BOT_COUNT);
+        spawnSpikes(SPIKE_COUNT);
+        
+        mouse.x = 0;
+        mouse.y = 0;
+
+        if (animationId) cancelAnimationFrame(animationId);
+        gameLoop();
+    }
+
+    // 开始游戏
+    function startGame() {
+        document.getElementById('startScreen').style.display = 'none';
+        restartGame();
+    }
+
+</script>
+</body>
+</html>
